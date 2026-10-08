@@ -1,0 +1,24 @@
+spring:
+  main:
+    banner-mode: "off"
+  datasource:
+    url: ${TEST_DATABASE_URL:jdbc:postgresql://localhost:5432/booking_test}
+    username: ${TEST_DATABASE_USERNAME:booking}
+    password: ${TEST_DATABASE_PASSWORD:booking}
+    hikari:
+      maximum-pool-size: 30
+
+booking:
+  default-timezone: Europe/Belgrade
+  admin:
+    bootstrap-emails: ""
+  mail:
+    # Neither the log nor the SMTP sender is active; tests capture links instead.
+    mode: test
+
+
+logging:
+  level:
+    root: WARN
+    # Expected errors (e.g. the simulated fulfillment failure) are logged by these.
+    com.booking: WARN
