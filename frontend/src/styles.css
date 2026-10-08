@@ -1,0 +1,49 @@
+:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2328;
+  background: #f6f7f9;
+  --available: #1a7f37;
+  --pending: #9a6700;
+  --unavailable: #cf222e;
+  --nonworking: #6e7781;
+}
+body { margin: 0; }
+.topbar { display: flex; gap: 1.5rem; align-items: center; padding: 0.75rem 1.5rem; background: #24292f; }
+.topbar a { color: #fff; text-decoration: none; }
+.topbar .brand { font-weight: 600; margin-right: auto; }
+.container { max-width: 860px; margin: 0 auto; padding: 1rem 1.5rem 3rem; }
+.muted { color: #6e7781; font-size: 0.9em; }
+.error { color: var(--unavailable); }
+.success { color: var(--available); }
+button { cursor: pointer; padding: 0.4rem 0.8rem; border: 1px solid #1f6feb; background: #1f6feb; color: #fff; border-radius: 6px; }
+button.secondary { background: #fff; color: #1f2328; border-color: #d0d7de; }
+button.danger { background: #fff; color: var(--unavailable); border-color: var(--unavailable); }
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+input, select { padding: 0.35rem 0.5rem; border: 1px solid #d0d7de; border-radius: 6px; font: inherit; }
+label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9em; }
+.inline-form { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin: 1rem 0; }
+.company-list li { margin: 0.5rem 0; font-size: 1.1em; }
+.date-bar { display: flex; gap: 0.5rem; align-items: center; margin: 1rem 0 0.5rem; }
+.slots { list-style: none; padding: 0; display: grid; gap: 0.35rem; }
+.slot { width: 100%; display: flex; justify-content: space-between; background: #fff; color: #1f2328; border: 1px solid #d0d7de; border-left-width: 6px; }
+.slot:disabled { opacity: 1; }
+.slot-available { border-left-color: var(--available); }
+.slot-available .slot-status { color: var(--available); }
+.slot-pending { border-left-color: var(--pending); }
+.slot-pending .slot-status { color: var(--pending); }
+.slot-unavailable { border-left-color: var(--unavailable); background: #fff5f5; }
+.slot-unavailable .slot-status { color: var(--unavailable); }
+.slot-non_working { border-left-color: var(--nonworking); background: #eef0f2; color: var(--nonworking); }
+.slot.selected { outline: 2px solid #1f6feb; }
+.slot-time { font-variant-numeric: tabular-nums; font-weight: 600; }
+.booking-form { margin-top: 1.5rem; padding: 1rem; background: #fff; border: 1px solid #d0d7de; border-radius: 8px; display: grid; gap: 0.75rem; max-width: 420px; }
+.booking-form h2 { margin: 0; font-size: 1.1em; }
+.admin-nav { display: flex; gap: 1rem; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #d0d7de; }
+.admin-nav a.active { font-weight: 600; }
+.admin-nav .muted { margin-left: auto; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #d0d7de; vertical-align: top; }
+.badge { padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.8em; color: #fff; }
+.badge-pending { background: var(--pending); }
+.badge-approved { background: var(--available); }
+.badge-denied { background: var(--nonworking); }
