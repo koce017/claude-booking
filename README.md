@@ -12,11 +12,12 @@ The full specification is in [`working-description.md`](working-description.md).
 | Tool       | Version |
 |------------|---------|
 | Java (JDK) | 21      |
-| Maven      | 3.9+    |
 | Node.js    | 20+     |
 | PostgreSQL | 14+     |
 
-Docker is not required.
+You don't need to install Maven: the backend includes the Maven Wrapper (`mvnw` / `mvnw.cmd`), which downloads Maven 3.9.11 on first use. Docker is not required.
+
+On Windows, use `mvnw.cmd` wherever this README says `./mvnw`, and set environment variables with `set NAME=value` (cmd) or `$env:NAME="value"` (PowerShell).
 
 ## 1. Create the databases
 
@@ -34,14 +35,14 @@ Flyway creates all tables on first start. You don't need to write any schema by 
 
 ```bash
 cd backend
-ADMIN_BOOTSTRAP_EMAILS=admin@example.com mvn spring-boot:run
+ADMIN_BOOTSTRAP_EMAILS=admin@example.com ./mvnw spring-boot:run
 ```
 
 - The API runs at http://localhost:8080.
 - Swagger UI is at http://localhost:8080/swagger-ui.html, and the OpenAPI JSON at `/v3/api-docs`.
 - `ADMIN_BOOTSTRAP_EMAILS` (comma-separated) creates those administrators on startup if they don't exist. There is no admin registration.
 
-To build a jar instead, run `mvn package`, then `java -jar target/booking-backend-0.1.0-SNAPSHOT.jar`.
+To build a jar instead, run `./mvnw package`, then `java -jar target/booking-backend-0.1.0-SNAPSHOT.jar`.
 
 ## 3. Start the frontend
 
@@ -66,7 +67,7 @@ To send real emails, set `MAIL_MODE=smtp` and the `MAIL_*` variables below.
 
 ```bash
 cd backend
-mvn test
+./mvnw test
 ```
 
 The integration tests run against the real PostgreSQL database `booking_test` (override with `TEST_DATABASE_URL`, `TEST_DATABASE_USERNAME` and `TEST_DATABASE_PASSWORD`). Each test empties the tables first. The tests cover:
