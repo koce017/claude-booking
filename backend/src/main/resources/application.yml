@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: booking-backend
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/booking}
+    username: ${DATABASE_USERNAME:booking}
+    password: ${DATABASE_PASSWORD:booking}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:25}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+
+booking:
+  # Used whenever a company has no timezone configured. The only place this default lives.
+  default-timezone: ${BOOKING_DEFAULT_TIMEZONE:Europe/Belgrade}
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  # Max number of days a single availability request may span.
+  max-availability-range-days: 62
+  admin:
+    # Comma-separated list of admin emails created on startup if missing.
+    bootstrap-emails: ${ADMIN_BOOTSTRAP_EMAILS:}
+    magic-link-ttl: ${MAGIC_LINK_TTL:15m}
+    session-ttl: ${ADMIN_SESSION_TTL:12h}
+  mail:
+    # "log" prints magic links to the application log (local development);
+    # "smtp" sends real emails through spring.mail.*.
+    mode: ${MAIL_MODE:log}
+    from: ${MAIL_FROM:no-reply@booking.local}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
