@@ -33,10 +33,29 @@ Flyway creates all tables on first start. You don't need to write any schema by 
 
 ## 2. Start the backend
 
+macOS / Linux:
+
 ```bash
 cd backend
 ADMIN_BOOTSTRAP_EMAILS=admin@example.com ./mvnw spring-boot:run
 ```
+
+Windows (PowerShell):
+
+```powershell
+cd backend
+$env:ADMIN_BOOTSTRAP_EMAILS="admin@example.com"; .\mvnw.cmd spring-boot:run
+```
+
+Windows (cmd):
+
+```bat
+cd backend
+set ADMIN_BOOTSTRAP_EMAILS=admin@example.com
+mvnw.cmd spring-boot:run
+```
+
+Use the same email on the admin login page. Each time the backend starts, it creates the administrators listed in `ADMIN_BOOTSTRAP_EMAILS` that don't exist yet. Admins are stored in the database, so later starts don't need the variable.
 
 - The API runs at http://localhost:8080.
 - Swagger UI is at http://localhost:8080/swagger-ui.html, and the OpenAPI JSON at `/v3/api-docs`.
@@ -67,7 +86,7 @@ To send real emails, set `MAIL_MODE=smtp` and the `MAIL_*` variables below.
 
 ```bash
 cd backend
-./mvnw test
+./mvnw test        # Windows: .\mvnw.cmd test
 ```
 
 The integration tests run against the real PostgreSQL database `booking_test` (override with `TEST_DATABASE_URL`, `TEST_DATABASE_USERNAME` and `TEST_DATABASE_PASSWORD`). Each test empties the tables first. The tests cover:
