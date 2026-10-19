@@ -11,6 +11,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public record BookingProperties(
         @DefaultValue("Europe/Belgrade") ZoneId defaultTimezone,
         @DefaultValue("http://localhost:5173") String frontendUrl,
+        /** Extra browser origins allowed by CORS, in addition to frontendUrl. */
+        @DefaultValue List<String> corsAllowedOrigins,
         @DefaultValue("62") int maxAvailabilityRangeDays,
         @DefaultValue Admin admin,
         @DefaultValue Mail mail) {

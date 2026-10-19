@@ -1,7 +1,9 @@
 package com.booking.config;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -61,7 +63,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(BookingProperties properties) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(properties.frontendUrl()));
+        Set<String> origins = new LinkedHashSet<>();
+        origins.add(properties.frontendUrl());
+        properties.corsAllowedOrigins().stream().map(String::trim).filter(o -> !o.isEmpty()).forEach(origins::add);
+        config.setAllowedOrigins(List.copyOf(origins));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setMaxAge(3600L);

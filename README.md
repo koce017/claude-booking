@@ -91,6 +91,7 @@ All settings come from environment variables. There are no secrets in the reposi
 | `DATABASE_USERNAME` / `DATABASE_PASSWORD` | `booking` / `booking` | DB credentials |
 | `SERVER_PORT` | `8080` | HTTP port |
 | `FRONTEND_URL` | `http://localhost:5173` | Base URL for magic links; allowed CORS origin |
+| `CORS_ALLOWED_ORIGINS` | `http://127.0.0.1:5173` | Extra allowed browser origins (comma-separated) |
 | `ADMIN_BOOTSTRAP_EMAILS` | (empty) | Admins created on startup |
 | `BOOKING_DEFAULT_TIMEZONE` | `Europe/Belgrade` | Time zone for companies that have none set |
 | `MAIL_MODE` | `log` | `log` prints magic links to the log; `smtp` sends email |
