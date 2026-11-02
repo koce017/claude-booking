@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.booking.appointment.CustomerFieldPolicy.SubmittedCustomer;
 import com.booking.common.error.ConflictException;
 import com.booking.company.Company;
 import com.booking.support.IntegrationTest;
@@ -56,7 +57,7 @@ class ConcurrentBookingTest extends IntegrationTest {
                     ready.countDown();
                     go.await();
                     try {
-                        bookingService.book(companyId, start, new CustomerInfo("User " + n, "123", "u" + n + "@example.com"));
+                        bookingService.book(companyId, start, new SubmittedCustomer("User " + n, "123", "u" + n + "@example.com"));
                         succeeded.incrementAndGet();
                     } catch (ConflictException e) {
                         conflicts.incrementAndGet();
@@ -118,7 +119,7 @@ class ConcurrentBookingTest extends IntegrationTest {
                 Instant start = at(MONDAY, hour, 0);
                 futures.add(pool.submit(() -> {
                     go.await();
-                    return bookingService.book(company.getId(), start, new CustomerInfo("U", "1", "u@example.com"));
+                    return bookingService.book(company.getId(), start, new SubmittedCustomer("U", "1", "u@example.com"));
                 }));
             }
             go.countDown();
@@ -135,7 +136,7 @@ class ConcurrentBookingTest extends IntegrationTest {
     void denialAndRebookingStayWithinCapacity() throws Exception {
         Company company = createCompany("Test Company", 1);
         Instant start = at(MONDAY, 14, 0);
-        Appointment first = bookingService.book(company.getId(), start, new CustomerInfo("A", "1", "a@example.com"));
+        Appointment first = bookingService.book(company.getId(), start, new SubmittedCustomer("A", "1", "a@example.com"));
         approvalService.deny(first.getId());
 
         Outcome outcome = raceToBook(company.getId(), start);

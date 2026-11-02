@@ -29,17 +29,27 @@ public class CompanySettingsResolver {
     }
 
     public EffectiveCompanySettings resolve(Company company) {
+        Duration duration = company.getAppointmentDurationMinutes() != null
+                ? Duration.ofMinutes(company.getAppointmentDurationMinutes())
+                : DEFAULT_APPOINTMENT_DURATION;
         return new EffectiveCompanySettings(
                 resolveZone(company),
-                company.getAppointmentDurationMinutes() != null
-                        ? Duration.ofMinutes(company.getAppointmentDurationMinutes())
-                        : DEFAULT_APPOINTMENT_DURATION,
+                duration,
+                // By default a new slot starts when the previous one ends.
+                company.getSlotIntervalMinutes() != null
+                        ? Duration.ofMinutes(company.getSlotIntervalMinutes())
+                        : duration,
                 company.getMaxConcurrentAppointments() != null
                         ? company.getMaxConcurrentAppointments()
                         : DEFAULT_MAX_CONCURRENT_APPOINTMENTS,
                 company.getBookingWindowMonths() != null
                         ? company.getBookingWindowMonths()
-                        : DEFAULT_BOOKING_WINDOW_MONTHS);
+                        : DEFAULT_BOOKING_WINDOW_MONTHS,
+                company.getCustomerForm() != null ? company.getCustomerForm() : CustomerFormConfig.DEFAULT);
+    }
+
+    public ZoneId defaultZone() {
+        return defaultZone;
     }
 
     private ZoneId resolveZone(Company company) {

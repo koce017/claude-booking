@@ -90,7 +90,8 @@ public class AvailabilityService {
         List<DayAvailability> days = new ArrayList<>();
         periodsByDate.forEach((date, periods) -> {
             List<SlotView> views = new ArrayList<>();
-            for (Slot slot : slotGenerator.generate(date, periods, settings.appointmentDuration(), zone)) {
+            for (Slot slot : slotGenerator.generate(date, periods, settings.appointmentDuration(),
+                    settings.slotInterval(), zone)) {
                 views.add(slotView(slot, settings, window, now, occupancy));
             }
             views.addAll(nonWorkingBlocks(date, periods, zone));
@@ -99,7 +100,8 @@ public class AvailabilityService {
         });
 
         return new AvailabilityResponse(company.getId(), zone.getId(),
-                (int) settings.appointmentDuration().toMinutes(), window, days);
+                (int) settings.appointmentDuration().toMinutes(), (int) settings.slotInterval().toMinutes(),
+                window, days);
     }
 
     /**
@@ -118,7 +120,8 @@ public class AvailabilityService {
             throw new BadRequestException("OUTSIDE_BOOKING_WINDOW", "The requested date is outside the booking window");
         }
         List<TimeRange> periods = scheduleService.workingPeriods(company, localDate);
-        return slotGenerator.generate(localDate, periods, settings.appointmentDuration(), zone).stream()
+        return slotGenerator.generate(localDate, periods, settings.appointmentDuration(), settings.slotInterval(), zone)
+                .stream()
                 .filter(s -> s.start().equals(start))
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException("NOT_A_WORKING_SLOT",

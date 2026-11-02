@@ -64,15 +64,18 @@ public class ScheduleService {
         return result;
     }
 
-    private Map<DayOfWeek, List<TimeRange>> weeklySchedule(Company company) {
-        List<WeeklySchedulePeriod> rows = weeklyRepository.findByCompanyId(company.getId());
-        if (rows.isEmpty()) {
+    /** The weekly schedule in effect: the saved one, or the default if none was saved. */
+    @Transactional(readOnly = true)
+    public Map<DayOfWeek, List<TimeRange>> weeklySchedule(Company company) {
+        if (!company.hasCustomWeeklySchedule()) {
             return DEFAULT_WEEKLY_SCHEDULE;
         }
+        List<WeeklySchedulePeriod> rows = weeklyRepository.findByCompanyId(company.getId());
         Map<DayOfWeek, List<TimeRange>> weekly = new EnumMap<>(DayOfWeek.class);
         for (WeeklySchedulePeriod row : rows) {
             weekly.computeIfAbsent(row.getDayOfWeek(), k -> new ArrayList<>()).add(row.toTimeRange());
         }
+        weekly.replaceAll((day, periods) -> sorted(periods));
         return weekly;
     }
 

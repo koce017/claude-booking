@@ -44,10 +44,19 @@ booking:
     magic-link-ttl: ${MAGIC_LINK_TTL:15m}
     session-ttl: ${ADMIN_SESSION_TTL:12h}
   mail:
-    # "log" prints magic links to the application log (local development);
+    # "log" prints all emails to the application log (local development);
     # "smtp" sends real emails through spring.mail.*.
     mode: ${MAIL_MODE:log}
     from: ${MAIL_FROM:no-reply@booking.local}
+    # Optional folder with edited email texts; see src/main/resources/mail-templates/README.md.
+    templates-dir: ${MAIL_TEMPLATES_DIR:}
+  notifications:
+    customer-emails: ${NOTIFY_CUSTOMERS:true}
+    admin-new-request: ${NOTIFY_ADMINS:true}
+  fulfillment:
+    # "email": approved appointments are emailed to the company's fulfillment email.
+    # "manual": nothing is sent; administrators hand appointments over themselves.
+    mode: ${FULFILLMENT_MODE:email}
 
 springdoc:
   swagger-ui:

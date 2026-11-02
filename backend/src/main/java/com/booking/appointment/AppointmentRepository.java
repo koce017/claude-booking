@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -56,6 +57,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     Optional<Long> findCompanyIdById(@Param("id") Long id);
 
     List<Appointment> findByCompanyIdAndStatus(Long companyId, AppointmentStatus status);
+
+    @Modifying
+    @Query("update Appointment a set a.fulfilledAt = :at where a.id = :id")
+    void markFulfilled(@Param("id") Long id, @Param("at") Instant at);
 
     @Override
     @EntityGraph(attributePaths = "company")

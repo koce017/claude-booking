@@ -1,0 +1,8 @@
+Subject: Link za prijavu u administraciju
+
+Za prijavu u administraciju sistema za zakazivanje otvorite ovaj link:
+
+{link}
+
+Link važi {minutes} minuta i može se iskoristiti samo jednom.
+Ako niste tražili prijavu, slobodno zanemarite ovu poruku.

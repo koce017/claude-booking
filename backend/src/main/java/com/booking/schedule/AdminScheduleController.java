@@ -84,7 +84,7 @@ public class AdminScheduleController {
         overrideService.remove(companyId, date);
     }
 
-    private static TimeRange toRange(PeriodDto p) {
+    static TimeRange toRange(PeriodDto p) {
         if (!p.end().isAfter(p.start())) {
             throw new BadRequestException("INVALID_PERIOD", "Period end must be after start");
         }

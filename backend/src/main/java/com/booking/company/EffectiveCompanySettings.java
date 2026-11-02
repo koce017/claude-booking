@@ -10,6 +10,8 @@ import java.time.ZoneId;
 public record EffectiveCompanySettings(
         ZoneId zone,
         Duration appointmentDuration,
+        Duration slotInterval,
         int maxConcurrentAppointments,
-        int bookingWindowMonths) {
+        int bookingWindowMonths,
+        CustomerFormConfig customerForm) {
 }

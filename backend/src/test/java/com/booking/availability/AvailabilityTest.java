@@ -126,6 +126,8 @@ class AvailabilityTest extends IntegrationTest {
     @Test
     void configuredWeeklyScheduleReplacesDefault() {
         Company company = createCompany("Test Company");
+        company.setCustomWeeklySchedule(true);
+        companyRepository.save(company);
         weeklyRepository.save(new WeeklySchedulePeriod(company, DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(12, 0)));
         weeklyRepository.save(new WeeklySchedulePeriod(company, DayOfWeek.MONDAY, LocalTime.of(13, 0), LocalTime.of(15, 0)));
 

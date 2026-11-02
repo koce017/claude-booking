@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
+import com.booking.company.CustomerFormConfig;
 import com.booking.company.EffectiveCompanySettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +21,8 @@ class BookingWindowServiceTest {
     private static BookingWindow windowAt(String instant, int months) {
         Clock clock = Clock.fixed(Instant.parse(instant), ZoneOffset.UTC);
         return new BookingWindowService(clock)
-                .windowFor(new EffectiveCompanySettings(ZONE, Duration.ofHours(1), 1, months));
+                .windowFor(new EffectiveCompanySettings(ZONE, Duration.ofHours(1), Duration.ofHours(1), 1, months,
+                        CustomerFormConfig.DEFAULT));
     }
 
     @Test

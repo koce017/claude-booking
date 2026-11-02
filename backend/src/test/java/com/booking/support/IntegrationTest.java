@@ -61,6 +61,9 @@ public abstract class IntegrationTest {
     protected CapturingMagicLinkSender magicLinks;
 
     @Autowired
+    protected CapturingMailGateway mails;
+
+    @Autowired
     protected CompanyRepository companyRepository;
 
     @Autowired
@@ -76,6 +79,7 @@ public abstract class IntegrationTest {
                          company, admin_session, admin_login_token, administrator RESTART IDENTITY CASCADE""");
         clock.set(DEFAULT_NOW);
         magicLinks.clear();
+        mails.clear();
     }
 
     protected Company createCompany(String name) {

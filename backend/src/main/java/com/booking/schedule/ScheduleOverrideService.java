@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.booking.common.error.BadRequestException;
 import com.booking.common.error.NotFoundException;
 import com.booking.company.Company;
 import com.booking.company.CompanyService;
@@ -35,7 +34,7 @@ public class ScheduleOverrideService {
      */
     @Transactional
     public ScheduleOverride set(Long companyId, LocalDate date, List<TimeRange> periods, String note) {
-        validateNoOverlap(periods);
+        TimeRanges.requireNoOverlap(periods);
         Company company = companyService.get(companyId);
         ScheduleOverride override = overrideRepository.findByCompanyIdAndDate(companyId, date)
                 .orElseGet(() -> new ScheduleOverride(company, date));
@@ -49,15 +48,5 @@ public class ScheduleOverrideService {
         ScheduleOverride override = overrideRepository.findByCompanyIdAndDate(companyId, date)
                 .orElseThrow(() -> new NotFoundException("Schedule override", date));
         overrideRepository.delete(override);
-    }
-
-    private static void validateNoOverlap(List<TimeRange> periods) {
-        for (int i = 0; i < periods.size(); i++) {
-            for (int j = i + 1; j < periods.size(); j++) {
-                if (periods.get(i).overlaps(periods.get(j))) {
-                    throw new BadRequestException("OVERLAPPING_PERIODS", "Working periods must not overlap");
-                }
-            }
-        }
     }
 }

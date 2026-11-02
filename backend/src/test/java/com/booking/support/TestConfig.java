@@ -18,4 +18,9 @@ public class TestConfig {
     public CapturingMagicLinkSender capturingMagicLinkSender() {
         return new CapturingMagicLinkSender();
     }
+
+    @Bean
+    public CapturingMailGateway capturingMailGateway() {
+        return new CapturingMailGateway();
+    }
 }

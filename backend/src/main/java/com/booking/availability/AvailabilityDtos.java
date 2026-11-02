@@ -13,6 +13,7 @@ public final class AvailabilityDtos {
             Long companyId,
             String timezone,
             int appointmentDurationMinutes,
+            int slotIntervalMinutes,
             BookingWindow bookingWindow,
             List<DayAvailability> days) {
     }

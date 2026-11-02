@@ -18,20 +18,26 @@ import com.booking.company.CompanyDtos.PublicCompanyResponse;
 public class PublicCompanyController {
 
     private final CompanyService companyService;
+    private final CompanySettingsResolver settingsResolver;
 
-    public PublicCompanyController(CompanyService companyService) {
+    public PublicCompanyController(CompanyService companyService, CompanySettingsResolver settingsResolver) {
         this.companyService = companyService;
+        this.settingsResolver = settingsResolver;
     }
 
     @GetMapping
     @Operation(summary = "List active companies")
     public List<PublicCompanyResponse> list() {
-        return companyService.listActive().stream().map(PublicCompanyResponse::from).toList();
+        return companyService.listActive().stream().map(this::toResponse).toList();
     }
 
     @GetMapping("/{companyId}")
     @Operation(summary = "Get an active company", description = "Returns 404 for unknown or removed companies.")
     public PublicCompanyResponse get(@PathVariable Long companyId) {
-        return PublicCompanyResponse.from(companyService.getActive(companyId));
+        return toResponse(companyService.getActive(companyId));
+    }
+
+    private PublicCompanyResponse toResponse(Company company) {
+        return PublicCompanyResponse.from(company, settingsResolver.resolve(company));
     }
 }

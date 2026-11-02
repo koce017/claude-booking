@@ -10,7 +10,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A company users can request appointments with. Settings columns are nullable:
@@ -40,17 +42,32 @@ public class Company {
 
     private String website;
 
+    /** Where approved appointments are emailed. Admin-only, never shown to customers. */
+    @Column(name = "fulfillment_email")
+    private String fulfillmentEmail;
+
     /** IANA zone id, e.g. "Europe/Belgrade". */
     private String timezone;
 
     @Column(name = "appointment_duration_minutes")
     private Integer appointmentDurationMinutes;
 
+    @Column(name = "slot_interval_minutes")
+    private Integer slotIntervalMinutes;
+
     @Column(name = "max_concurrent_appointments")
     private Integer maxConcurrentAppointments;
 
     @Column(name = "booking_window_months")
     private Integer bookingWindowMonths;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "customer_form")
+    private CustomerFormConfig customerForm;
+
+    /** False until an administrator saves a weekly schedule; the default schedule applies meanwhile. */
+    @Column(name = "custom_weekly_schedule", nullable = false)
+    private boolean customWeeklySchedule;
 
     @Column(nullable = false)
     private boolean active = true;
@@ -132,6 +149,38 @@ public class Company {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getFulfillmentEmail() {
+        return fulfillmentEmail;
+    }
+
+    public void setFulfillmentEmail(String fulfillmentEmail) {
+        this.fulfillmentEmail = fulfillmentEmail;
+    }
+
+    public Integer getSlotIntervalMinutes() {
+        return slotIntervalMinutes;
+    }
+
+    public void setSlotIntervalMinutes(Integer slotIntervalMinutes) {
+        this.slotIntervalMinutes = slotIntervalMinutes;
+    }
+
+    public CustomerFormConfig getCustomerForm() {
+        return customerForm;
+    }
+
+    public void setCustomerForm(CustomerFormConfig customerForm) {
+        this.customerForm = customerForm;
+    }
+
+    public boolean hasCustomWeeklySchedule() {
+        return customWeeklySchedule;
+    }
+
+    public void setCustomWeeklySchedule(boolean customWeeklySchedule) {
+        this.customWeeklySchedule = customWeeklySchedule;
     }
 
     public String getTimezone() {

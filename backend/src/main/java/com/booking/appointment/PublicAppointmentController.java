@@ -38,7 +38,7 @@ public class PublicAppointmentController {
     @ApiResponse(responseCode = "409", description = "Slot is no longer available (capacity used up)")
     public BookingResponse book(@PathVariable Long companyId, @Valid @RequestBody BookingRequest request) {
         Appointment appointment = bookingService.book(companyId, request.start().toInstant(),
-                request.customer().toCustomerInfo());
+                request.customer().toSubmitted());
         return BookingResponse.from(appointment);
     }
 }

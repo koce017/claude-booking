@@ -1,0 +1,15 @@
+Subject: Pomeren termin – sada {date} {time}
+
+Poštovani,
+
+termin za {company} je pomeren.
+
+Prethodni termin: {previousDate} u {previousTime}
+Novi termin: {date}, {time}–{endTime}
+Broj termina: {appointmentId}
+
+Klijent: {customerName}
+Telefon: {customerPhone}
+Email: {customerEmail}
+
+Srdačan pozdrav

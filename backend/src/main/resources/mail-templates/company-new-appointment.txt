@@ -1,0 +1,20 @@
+Subject: Novi potvrđeni termin – {date} {time}
+
+Poštovani,
+
+potvrđen je novi termin za {company}:
+
+Datum: {date}
+Vreme: {time}–{endTime}
+Broj termina: {appointmentId}
+
+Klijent: {customerName}
+Telefon: {customerPhone}
+Email: {customerEmail}
+Adresa: {customerAddress}
+Odgovori:
+{customerAnswers}
+
+Napomena: {adminNote}
+
+Srdačan pozdrav

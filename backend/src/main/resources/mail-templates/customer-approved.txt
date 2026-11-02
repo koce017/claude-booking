@@ -1,0 +1,15 @@
+Subject: Vaš termin je potvrđen – {company}
+
+Poštovani/a {customerName},
+
+vaš termin je potvrđen:
+
+Firma: {company}
+Adresa: {companyAddress}
+Datum: {date}
+Vreme: {time}–{endTime}
+Broj termina: {appointmentId}
+
+Ako ne možete da dođete, molimo vas da nas obavestite na vreme.
+
+Srdačan pozdrav
