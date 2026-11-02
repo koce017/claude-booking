@@ -12,6 +12,7 @@ export const t = {
     appointments: 'Termini',
     calendar: 'Kalendar',
     newAppointment: 'Novi termin',
+    administrators: 'Administratori',
     logout: 'Odjava',
   },
   common: {
@@ -152,6 +153,17 @@ export const t = {
     HIDDEN: 'Ne traži se',
   } satisfies Record<FieldRequirement, string>,
 
+  // Admin: administrators
+  administrators: {
+    title: 'Administratori',
+    help: 'Svi administratori imaju ista prava. Novi administrator se prijavljuje linkom koji dobija na email.',
+    email: 'Email',
+    add: 'Dodaj administratora',
+    since: 'Dodat',
+    you: '(vi)',
+    removeConfirm: 'Ukloniti administratora {email}? Biće odmah odjavljen.',
+  },
+
   // Admin: appointments
   appointments: {
     title: 'Termini',
@@ -248,6 +260,8 @@ export const t = {
       RANGE_TOO_LARGE: 'Izabrani period je predugačak.',
       RATE_LIMITED: 'Previše pokušaja. Sačekajte malo pa pokušajte ponovo.',
       UNAUTHENTICATED: 'Prijava je istekla. Prijavite se ponovo.',
+      ADMIN_EXISTS: 'Ova adresa već pripada administratoru.',
+      CANNOT_REMOVE_SELF: 'Ne možete ukloniti sopstveni nalog.',
       INVALID_LOGIN_TOKEN: 'Link za prijavu je neispravan, već iskorišćen ili je istekao.',
       INVALID_RANGE: 'Neispravan raspon datuma.',
       MALFORMED_REQUEST: 'Neispravan zahtev.',

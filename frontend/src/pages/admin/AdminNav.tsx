@@ -24,9 +24,8 @@ export default function AdminNav() {
       </NavLink>
       <NavLink to="/admin/calendar">{t.nav.calendar}</NavLink>
       <NavLink to="/admin/appointments/new">{t.nav.newAppointment}</NavLink>
-      <NavLink to="/admin/companies">
-        {t.nav.companies}
-      </NavLink>
+      <NavLink to="/admin/companies">{t.nav.companies}</NavLink>
+      <NavLink to="/admin/administrators">{t.nav.administrators}</NavLink>
       <span className="muted">{session?.email}</span>
       <button className="secondary" onClick={logout}>
         {t.nav.logout}

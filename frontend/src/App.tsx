@@ -1,5 +1,6 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { t } from './i18n/sr';
+import AdministratorsPage from './pages/admin/AdministratorsPage';
 import AdminAppointmentsPage from './pages/admin/AdminAppointmentsPage';
 import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import AdminCompaniesPage from './pages/admin/AdminCompaniesPage';
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/admin/companies/:companyId" element={<RequireAdmin><AdminCompanyEditPage /></RequireAdmin>} />
           <Route path="/admin/appointments" element={<RequireAdmin><AdminAppointmentsPage /></RequireAdmin>} />
           <Route path="/admin/appointments/new" element={<RequireAdmin><AdminNewAppointmentPage /></RequireAdmin>} />
+          <Route path="/admin/administrators" element={<RequireAdmin><AdministratorsPage /></RequireAdmin>} />
           <Route path="/admin/calendar" element={<RequireAdmin><AdminCalendarPage /></RequireAdmin>} />
           <Route
             path="*"

@@ -194,3 +194,9 @@ export interface Session {
   expiresAt: string;
   email: string;
 }
+
+export interface Administrator {
+  id: number;
+  email: string;
+  createdAt: string;
+}

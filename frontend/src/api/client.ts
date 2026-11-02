@@ -1,5 +1,6 @@
 import type {
   AdminAppointment,
+  Administrator,
   AdminCompany,
   AppointmentStatus,
   Availability,
@@ -121,6 +122,12 @@ export const adminApi = {
   verify: (token: string) =>
     request<Session>('/api/admin/auth/verify', { method: 'POST', body: json({ token }) }),
   logout: () => request<void>('/api/admin/auth/logout', { method: 'POST' }, true),
+
+  administrators: () => request<Administrator[]>('/api/admin/administrators', {}, true),
+  addAdministrator: (email: string) =>
+    request<Administrator>('/api/admin/administrators', { method: 'POST', body: json({ email }) }, true),
+  removeAdministrator: (id: number) =>
+    request<void>(`/api/admin/administrators/${id}`, { method: 'DELETE' }, true),
 
   companies: (includeInactive = false) =>
     request<AdminCompany[]>(`/api/admin/companies?includeInactive=${includeInactive}`, {}, true),

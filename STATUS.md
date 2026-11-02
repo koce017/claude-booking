@@ -1,9 +1,9 @@
 # Project status
 
-This file hands the project over between work sessions. It records what has been built, what remains, and the decisions already made. A new session should read this file, then `README.md` (setup, API, architecture) and `working-description.md` (the full specification), and then pick tasks from "What remains" below.
+This file hands the project over between work sessions. It records what has been built, what remains, and the decisions already made. A new session should read this file, then `README.md` (setup, API, architecture) and `working-description.md` (the full specification).
 
-- **Branch:** `claude/gifted-cannon-cza92g`. No pull request has been opened yet.
-- **Last updated:** 2026-10-19
+- **Branch:** `claude/gifted-cannon-cza92g`
+- **Last updated:** 2026-11-02
 
 ---
 
@@ -12,96 +12,76 @@ This file hands the project over between work sessions. It records what has been
 | Topic | Decision |
 |---|---|
 | Default time zone | `Europe/Belgrade`, used when a company has none set |
-| January 7 and 8 | Only an example for testing. They are not hardcoded or seeded; set them as date overrides through the API. |
-| Admin appointments page | Included (list, approve, deny) |
+| January 7 and 8 | Only an example for testing. Not hardcoded; set them as special dates in the admin UI. |
 | Approving a request whose time has passed | Refused with 409 |
-| Pending requests of a removed company | Set to `DENIED` automatically. The records are kept, not deleted. |
+| Pending requests of a removed company | Set to `DENIED` automatically. The records are kept. |
 | Docker | Not used. Tests run against a local PostgreSQL database (`booking_test`). |
 | Maven | No local install needed; use the wrapper (`./mvnw` or `mvnw.cmd`). |
 | Owner's environment | Windows with PowerShell. The README includes PowerShell commands. |
+| Fulfillment | By email. Administrators set each company's fulfillment email; customers never see it. |
+| Language | Serbian. The owner left the details to Claude; see the next table. |
+| Frontend | Minimal styling; the main functions matter, not the look. |
+| Production deployment | To be determined by the owner. |
+
+### Decisions Claude made (the owner asked it to decide)
+
+| Topic | Decision | Where to change it |
+|---|---|---|
+| Script | Serbian in Latin script, for the UI and emails | `frontend/src/i18n/sr.ts`, `backend/src/main/resources/mail-templates/` |
+| Who can cancel | Administrators only. Customers have no accounts, so there is no self-cancel link. | — |
+| New statuses | `CANCELLED`, `COMPLETED`, `NO_SHOW`. Completed and no-show only once the appointment has started. | `Appointment`, `AppointmentStatus` |
+| Company without a fulfillment email | Approval still works; the appointment is marked "not delivered" so an admin hands it over. | `EmailFulfillmentService` |
+| Who gets emails | Customer: received, approved, denied, cancelled, moved. All admins: each new request. Company: approved, and cancelled/moved if it had been told. | `EmailNotificationService`, `EmailFulfillmentService` |
+| Admin-entered appointments | Same slot and capacity rules as public bookings, only the name required, approved immediately. | `AppointmentBookingService.bookByAdmin` |
+| Moving an appointment | Allowed for pending and approved ones, to a free bookable slot of the same company; the status stays. | `AppointmentManagementService.reschedule` |
+| Rate limits | Per IP: 5 login links and 20 link redemptions per 15 min, 20 bookings per hour. | `application.yml` |
+| Administrator management | Added an Administratori page (not in the spec) so new admins don't need a restart. | `AdministratorService` |
+| Weekly schedule | A saved schedule fully defines the week, even with no periods at all; "Vrati na podrazumevano" restores Mon–Fri 09:00–17:00. | `WeeklyScheduleService` |
 
 ---
 
-## What is implemented (first version / MVP)
+## What is implemented
 
-### Backend (Spring Boot 3.5, Java 21, PostgreSQL, Flyway)
+### Backend (Spring Boot 3.5, Java 21, PostgreSQL, Flyway migrations V1–V3)
 
-**Companies**
-- [x] Admins create a company with only a name. List and get endpoints exist for both public and admin users.
-- [x] Removal is a soft delete. A removed company is hidden from the public, its history is kept, and its pending requests are set to `DENIED`.
-- [x] Database columns exist for description, logo, address, phone, email, website, time zone, duration, capacity and booking window. Defaults are filled in by `CompanySettingsResolver`.
+- [x] **Companies:** create, list, soft delete, and edit every setting (description, address, phone, public email, website, logo URL, fulfillment email, time zone, duration, slot interval, capacity, booking window).
+- [x] **Weekly schedule** API with several periods per day; default Mon–Fri 09:00–17:00 until one is saved.
+- [x] **Special dates:** closed, or different hours; they beat the weekly schedule.
+- [x] **Availability:** slot states, booking window, a slot interval separate from the duration (overlapping slots share capacity), daylight-saving handling, no customer data in public responses.
+- [x] **Booking:** atomic, with the company row locked, so capacity can never be exceeded.
+- [x] **Customer form per company:** phone, email and address required/optional/hidden, plus custom questions. Answers are stored with the question text.
+- [x] **Appointment management:** approve, deny, cancel, reschedule, completed, no-show, internal notes, admin-entered appointments, list filters by company/status/time range.
+- [x] **Fulfillment by email** to the company, with delivery time recorded (`fulfilledAt`). `FULFILLMENT_MODE=manual` turns it off.
+- [x] **Notifications in Serbian** to customers and administrators, from editable template files (`MAIL_TEMPLATES_DIR` overrides them without rebuilding).
+- [x] **Admin authentication:** magic link (hashed, single-use, 15 min), 12-hour bearer sessions, administrator management.
+- [x] **Hardening:** per-IP rate limits (429), nightly cleanup of expired login tokens and sessions, `API_DOCS_ENABLED=false` hides Swagger.
+- [x] RFC 7807 errors with a `code`, OpenAPI/Swagger UI.
+- [x] **103 automated tests** against real PostgreSQL, including the concurrency test.
 
-**Schedules**
-- [x] Weekly schedule table, with several periods per day allowed. A company with no rows uses the default Mon–Fri 09:00–17:00.
-- [x] Date overrides: a date can be closed or given its own hours, and an override beats the weekly schedule. Admin API: `PUT`, `DELETE` and `GET /api/admin/companies/{id}/schedule/overrides`.
+### Frontend (React 18, TypeScript, Vite; minimal styling, Serbian)
 
-**Availability**
-- [x] Slots are generated per day, with the slot interval equal to the appointment duration and slots fitting fully inside working periods.
-- [x] Each slot has a state: `AVAILABLE`, `PENDING`, `UNAVAILABLE` or `NON_WORKING`. Unavailable slots carry a reason: `FULLY_BOOKED`, `PAST` or `OUTSIDE_BOOKING_WINDOW`.
-- [x] The booking window runs 12 months, extended to the end of that calendar month.
-- [x] Each request can cover one date or a range of up to 62 days.
-- [x] No customer data appears in public responses.
-- [x] On daylight-saving change days, slots that would not last the full duration are skipped.
+- [x] Public: company list, day view with slots, booking form that follows the company's customer form, confirmation; a slot taken meanwhile reloads the slots.
+- [x] Admin: login; companies with settings, weekly hours, special dates and customer form; appointments with all actions and delivery status; new appointment; weekly calendar; administrators.
+- [x] Times shown in the company's time zone everywhere.
+- [x] All texts in `frontend/src/i18n/sr.ts`.
+- [x] 8 Vitest tests (formatting, texts, booking page).
 
-**Booking**
-- [x] One atomic transaction locks the company row (`SELECT … FOR UPDATE`), then checks capacity and inserts the booking. Capacity can never be exceeded.
-- [x] The backend validates the company is active, the slot lines up with the schedule, the time isn't past, it's inside the booking window, and the required customer fields are present. The end time is derived from the duration.
-- [x] Requests are created as `PENDING`, and both `PENDING` and `APPROVED` count against capacity.
+### Other
 
-**Approval**
-- [x] Admins approve or deny `PENDING` requests. Approval re-checks capacity and refuses past appointments.
-- [x] After approval, `AppointmentFulfillmentService` is called once the transaction commits. The current implementation is `ManualFulfillmentService`, which only logs.
-- [x] `NotificationService` is separate from fulfillment. The current implementation only logs.
-
-**Admin authentication**
-- [x] Magic-link login. Tokens are random, stored only as hashes, valid for 15 minutes and single-use. Sessions are bearer tokens lasting 12 hours.
-- [x] `ADMIN_BOOTSTRAP_EMAILS` creates the first admins on startup.
-- [x] In development (`MAIL_MODE=log`), magic links are printed in the log. With `MAIL_MODE=smtp` they are sent by email.
-
-**General**
-- [x] Admins can list appointments filtered by company, status and date range, with paging, and view one appointment in detail.
-- [x] Errors use RFC 7807 JSON with a `code` field. No stack traces are exposed.
-- [x] OpenAPI/Swagger UI at `/swagger-ui.html`.
-- [x] Allowed browser origins are `FRONTEND_URL` plus `CORS_ALLOWED_ORIGINS` (default `http://127.0.0.1:5173`).
-- [x] 62 automated tests: unit tests plus integration tests against real PostgreSQL. They include a concurrency test, which was shown to fail when the lock is removed.
-
-### Frontend (React 18, TypeScript, Vite; minimal testing UI)
-- [x] Public pages: company list, then a day view with previous/next day and a date picker, then slots colour-coded by state, then a booking form, then a confirmation.
-- [x] When a slot is taken in the meantime (409), the page shows a message and reloads the slots. Responses for an earlier date are ignored if a newer one was requested.
-- [x] Admin pages: magic-link login and verify, company create/list/remove, and appointment list with filters and approve/deny.
+- [x] End-to-end browser check in `e2e/` covering the main flows (run manually; see `e2e/README.md`).
+- [x] GitHub Actions workflow running backend and frontend tests.
+- [x] `working-description.md` headings restored; `plan.md` marked as superseded.
 
 ---
 
 ## What remains
 
-### A. Admin features the specification defers to later versions
-
-The specification asks for these to be possible but not yet built.
-
-1. **Edit company settings.** Needs a backend `PUT`/`PATCH /api/admin/companies/{id}` and an admin form for name, description, contact details, logo, time zone, duration, capacity and booking window.
-2. **Weekly working schedule.** Needs a backend API and a UI to set working days and hours, including several periods per day. The table already exists.
-3. **Special-date overrides UI.** The API exists; only the admin form is missing.
-4. **Configurable required customer fields per company,** such as address or custom questions. `CustomerFieldPolicy` currently hardcodes name, phone and email, and the `appointment.customer_extra` JSONB column is reserved for extra fields. Needs storage for each company's field configuration, validation, and dynamic fields in the booking form.
-5. **Manual appointment creation by an admin** (spec §28).
-6. **Admin calendar view** showing company, date, time, appointment, status and customer (spec §29).
-
-### B. Behaviour and integrations
-7. **Real fulfillment implementations,** such as email to the company, a webhook or a company API. Add a new `AppointmentFulfillmentService` bean and pick one through configuration.
-8. **Real notifications to customers and admins,** for request received, approved and denied. Add a new `NotificationService` implementation.
-9. **Appointment cancellation and rescheduling, and extra statuses** (`CANCELLED`, `COMPLETED`, `NO_SHOW`, …). Changes go in `AppointmentStatus.CAPACITY_CONSUMING` and the transition methods on `Appointment`.
-10. **A slot interval separate from the appointment duration** (for example 30-minute steps for 60-minute appointments). Only `SlotGenerator` needs to change.
-11. **Admin appointments page time zone.** It shows times in the browser's time zone; it should use the company's.
-
-### C. Hardening and production readiness
-12. **Rate limiting** on `/api/admin/auth/request-link`, and possibly on public booking.
-13. **Production deployment setup.** Production configuration, HTTPS, real SMTP, turning off Swagger in production, and a cleanup job for expired login tokens and sessions.
-14. **Frontend tests.** There are none. The end-to-end browser test from development (Playwright, the §57 scenario) was not committed and could be added to the repo.
-15. **Continuous integration** that runs `./mvnw test` and `npm run build` automatically, for example a GitHub Actions workflow with a PostgreSQL service.
-16. **Visual design.** The UI is deliberately plain.
-
-### D. Housekeeping
-17. **Pull request.** Open one from `claude/gifted-cannon-cza92g` when ready.
-18. **Old files.** `plan.md` is an early summary that the specification now replaces. `working-description.md` has lost its Markdown formatting and ends with a stray `:::`. Both could be tidied up.
+1. **Production deployment** (owner to decide): hosting, domain and HTTPS, a real SMTP account (`MAIL_MODE=smtp` and `MAIL_*`), `FRONTEND_URL`, `API_DOCS_ENABLED=false`, `SERVER_FORWARD_HEADERS_STRATEGY=native` behind a proxy, database backups. The frontend is built with `npm run build` and served as static files, with `/api` routed to the backend.
+2. **Visual design**, if wanted later. The UI is deliberately plain.
+3. **Possible later improvements**, none requested:
+   - a link in customer emails to cancel without an account;
+   - rate limits shared between several backend instances (they are in memory now);
+   - running the e2e check in CI (needs both servers started in the workflow).
 
 ---
 
@@ -109,6 +89,6 @@ The specification asks for these to be possible but not yet built.
 
 Tell Claude something like:
 
-> Read `STATUS.md`, `README.md` and `working-description.md` in the repo (branch `claude/gifted-cannon-cza92g`). Then implement item(s) N from "What remains".
+> Read `STATUS.md`, `README.md` and `working-description.md` in the repo (branch `claude/gifted-cannon-cza92g`). Then …
 
-Update this file as items get done.
+Update this file as work gets done.
