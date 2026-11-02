@@ -25,4 +25,9 @@ public interface AdminLoginTokenRepository extends JpaRepository<AdminLoginToken
 
     @EntityGraph(attributePaths = "administrator")
     Optional<AdminLoginToken> findByTokenHash(String tokenHash);
+
+    /** Deletes tokens that expired before {@code cutoff}; used or not, they can never be redeemed. */
+    @Modifying
+    @Query("delete from AdminLoginToken t where t.expiresAt < :cutoff")
+    int deleteExpiredBefore(@Param("cutoff") Instant cutoff);
 }

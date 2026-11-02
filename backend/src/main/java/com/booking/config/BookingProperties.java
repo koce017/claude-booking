@@ -17,7 +17,8 @@ public record BookingProperties(
         @DefaultValue Admin admin,
         @DefaultValue Mail mail,
         @DefaultValue Notifications notifications,
-        @DefaultValue Fulfillment fulfillment) {
+        @DefaultValue Fulfillment fulfillment,
+        @DefaultValue RateLimit rateLimit) {
 
     public record Admin(
             @DefaultValue List<String> bootstrapEmails,
@@ -48,5 +49,21 @@ public record BookingProperties(
      *             email; "manual" sends nothing and administrators hand them over
      */
     public record Fulfillment(@DefaultValue("email") String mode) {
+    }
+
+    /**
+     * Per-client-IP request limits for endpoints that can be abused without logging in.
+     * Behind a reverse proxy, set server.forward-headers-strategy so the real client IP is used.
+     * A rule that is not configured means no limit for that endpoint.
+     */
+    public record RateLimit(
+            @DefaultValue("true") boolean enabled,
+            Rule loginLink,
+            Rule loginVerify,
+            Rule booking) {
+    }
+
+    /** At most {@code requests} requests per {@code window}. */
+    public record Rule(int requests, Duration window) {
     }
 }

@@ -20,7 +20,8 @@ class MailTemplatesTest {
         return new MailTemplates(new BookingProperties(ZoneId.of("Europe/Belgrade"), "http://localhost:5173", List.of(),
                 62, new BookingProperties.Admin(List.of(), Duration.ofMinutes(15), Duration.ofHours(12)),
                 new BookingProperties.Mail("log", "no-reply@example.com", dir),
-                new BookingProperties.Notifications(true, true), new BookingProperties.Fulfillment("email")));
+                new BookingProperties.Notifications(true, true), new BookingProperties.Fulfillment("email"),
+                new BookingProperties.RateLimit(false, null, null, null)));
     }
 
     @Test

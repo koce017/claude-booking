@@ -13,8 +13,12 @@ booking:
   admin:
     bootstrap-emails: ""
   mail:
-    # Neither the log nor the SMTP sender is active; tests capture links instead.
+    # Neither the log nor the SMTP sender is active; tests capture emails instead.
     mode: test
+  rate-limit:
+    enabled: false
+  scheduling:
+    enabled: false
 
 
 logging:
