@@ -84,7 +84,7 @@ public class AdminAppointmentController {
             description = "Same slot and capacity rules as a public booking, but only the customer's name is "
                     + "required. The appointment is APPROVED immediately and delivered to the company.")
     public AdminAppointmentResponse create(@Valid @RequestBody AdminBookingRequest request) {
-        return toResponse(bookingService.bookByAdmin(request.companyId(), request.start().toInstant(),
+        return reloaded(bookingService.bookByAdmin(request.companyId(), request.start().toInstant(),
                 request.customer().toSubmitted(), request.adminNote()));
     }
 
@@ -92,19 +92,19 @@ public class AdminAppointmentController {
     @Operation(summary = "Approve a pending appointment",
             description = "409 if it is not PENDING, already in the past, or approval would exceed capacity.")
     public AdminAppointmentResponse approve(@PathVariable Long id) {
-        return toResponse(approvalService.approve(id));
+        return reloaded(approvalService.approve(id));
     }
 
     @PostMapping("/{id}/deny")
     @Operation(summary = "Deny a pending appointment", description = "Frees the capacity. 409 if it is not PENDING.")
     public AdminAppointmentResponse deny(@PathVariable Long id) {
-        return toResponse(approvalService.deny(id));
+        return reloaded(approvalService.deny(id));
     }
 
     @PostMapping("/{id}/cancel")
     @Operation(summary = "Cancel a pending or approved appointment", description = "Frees the capacity.")
     public AdminAppointmentResponse cancel(@PathVariable Long id) {
-        return toResponse(managementService.cancel(id));
+        return reloaded(managementService.cancel(id));
     }
 
     @PostMapping("/{id}/complete")
@@ -123,13 +123,21 @@ public class AdminAppointmentController {
     @Operation(summary = "Move a pending or approved appointment to another slot",
             description = "The new start must be a bookable slot of the same company with free capacity.")
     public AdminAppointmentResponse reschedule(@PathVariable Long id, @Valid @RequestBody RescheduleRequest request) {
-        return toResponse(managementService.reschedule(id, request.start().toInstant()));
+        return reloaded(managementService.reschedule(id, request.start().toInstant()));
     }
 
     @PutMapping("/{id}/note")
     @Operation(summary = "Set the internal admin note")
     public AdminAppointmentResponse updateNote(@PathVariable Long id, @Valid @RequestBody NoteRequest request) {
         return toResponse(managementService.updateNote(id, request.adminNote()));
+    }
+
+    /**
+     * Re-reads the appointment after a change whose after-commit side effects may
+     * have updated it (e.g. the delivery time set once the company was emailed).
+     */
+    private AdminAppointmentResponse reloaded(Appointment appointment) {
+        return toResponse(queryService.get(appointment.getId()));
     }
 
     private AdminAppointmentResponse toResponse(Appointment appointment) {

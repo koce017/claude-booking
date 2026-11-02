@@ -1,0 +1,275 @@
+// All texts shown in the user interface, in Serbian (Latin script).
+// To change a text, edit it here; nothing else needs to change.
+// Texts that contain {name} placeholders are filled in with fmt().
+
+import type { AppointmentStatus, DayOfWeek, FieldRequirement, SlotView } from '../api/types';
+
+export const t = {
+  appName: 'Zakazivanje termina',
+  nav: {
+    admin: 'Administracija',
+    companies: 'Firme',
+    appointments: 'Termini',
+    calendar: 'Kalendar',
+    newAppointment: 'Novi termin',
+    logout: 'Odjava',
+  },
+  common: {
+    loading: 'Učitavanje…',
+    save: 'Sačuvaj',
+    saving: 'Čuvanje…',
+    saved: 'Sačuvano.',
+    cancel: 'Odustani',
+    back: 'Nazad',
+    remove: 'Ukloni',
+    add: 'Dodaj',
+    all: 'Sve',
+    yes: 'Da',
+    no: 'Ne',
+    notFound: 'Stranica nije pronađena.',
+    goHome: 'Početna',
+    defaultValue: 'podrazumevano: {value}',
+  },
+
+  // Public booking
+  companyList: {
+    title: 'Izaberite firmu',
+    empty: 'Još nema dostupnih firmi.',
+  },
+  booking: {
+    allCompanies: '← Sve firme',
+    previousDay: '← Prethodni dan',
+    nextDay: 'Sledeći dan →',
+    info: 'Vremena su prikazana u vremenskoj zoni firme ({timezone}). Termin traje {duration} min. Zakazivanje je moguće do {lastDate}',
+    loadingSlots: 'Učitavanje termina…',
+    closedDay: 'Firma ne radi ovog dana.',
+    formTitle: 'Zahtev za termin: {date} {start}–{end}',
+    otherPending: 'Za ovaj termin već postoje zahtevi na čekanju; i dalje ga možete zatražiti.',
+    name: 'Ime i prezime',
+    phone: 'Telefon',
+    email: 'Email',
+    address: 'Adresa',
+    optional: '(nije obavezno)',
+    submit: 'Pošalji zahtev',
+    submitting: 'Slanje…',
+    slotTaken: 'Žao nam je, ovaj termin je upravo zauzet. Izaberite drugo vreme.',
+    submitFailed: 'Zahtev nije poslat. Pokušajte ponovo.',
+    doneTitle: 'Zahtev je poslat',
+    doneText: 'Vaš zahtev za termin kod firme {company} za {date} {start}–{end} je primljen (broj zahteva: {id}).',
+    doneStatus: 'Zahtev čeka potvrdu administratora. Ako ste ostavili email adresu, dobićete obaveštenje.',
+    bookAnother: 'Zakaži drugi termin',
+    backToCompanies: 'Nazad na firme',
+  },
+  slot: {
+    AVAILABLE: 'Slobodno',
+    PENDING: 'Slobodno – postoje zahtevi na čekanju',
+    NON_WORKING: 'Ne radi',
+    PAST: 'Nedostupno (prošlo)',
+    OUTSIDE_BOOKING_WINDOW: 'Nedostupno (van perioda zakazivanja)',
+    FULLY_BOOKED: 'Zauzeto',
+  },
+
+  // Admin login
+  login: {
+    title: 'Prijava za administratore',
+    email: 'Email',
+    send: 'Pošalji link za prijavu',
+    sent: 'Ako ova adresa pripada administratoru, poslali smo link za prijavu. Otvorite ga da biste se prijavili.',
+    devHint: '(Lokalni razvoj: link je ispisan u logu backenda.)',
+    signingIn: 'Prijava u toku…',
+    missingToken: 'U linku za prijavu nedostaje token.',
+    newLink: 'Zatražite novi link',
+  },
+
+  // Admin: companies
+  companies: {
+    title: 'Firme',
+    name: 'Naziv firme',
+    create: 'Dodaj firmu',
+    empty: 'Još nema firmi.',
+    created: 'Dodata',
+    settings: 'Podešavanja',
+    removeConfirm: 'Ukloniti „{name}“? Firma više neće biti vidljiva korisnicima, a njeni zahtevi na čekanju biće odbijeni.',
+    noFulfillmentEmail: 'nema email za dostavu',
+  },
+  companyEdit: {
+    sections: {
+      details: 'Podaci i podešavanja',
+      weekly: 'Radno vreme',
+      overrides: 'Posebni datumi',
+      customerForm: 'Podaci o klijentu',
+    },
+    removed: 'Ova firma je uklonjena.',
+    publicInfo: 'Podaci vidljivi korisnicima',
+    description: 'Opis',
+    logoUrl: 'Logo (URL slike)',
+    address: 'Adresa',
+    phone: 'Telefon',
+    email: 'Javni email',
+    website: 'Sajt',
+    internal: 'Interno (vidi samo administrator)',
+    fulfillmentEmail: 'Email za dostavu termina',
+    fulfillmentEmailHelp:
+      'Potvrđeni, otkazani i pomereni termini šalju se na ovu adresu. Korisnici je ne vide. Ako je prazno, termine predajete ručno.',
+    booking: 'Pravila zakazivanja',
+    timezone: 'Vremenska zona',
+    duration: 'Trajanje termina (min)',
+    interval: 'Razmak između početaka termina (min)',
+    intervalHelp: 'Prazno = isto kao trajanje. Kraći razmak daje preklapajuće termine (npr. 9:00, 9:30, 10:00…).',
+    capacity: 'Najviše istovremenih termina',
+    window: 'Zakazivanje unapred (meseci)',
+  },
+  weekly: {
+    usingDefault: 'Koristi se podrazumevano radno vreme (pon–pet 09:00–17:00).',
+    custom: 'Sačuvano je posebno radno vreme.',
+    closed: 'Ne radi',
+    addPeriod: '+ period',
+    reset: 'Vrati na podrazumevano',
+    resetConfirm: 'Vratiti radno vreme na podrazumevano (pon–pet 09:00–17:00)?',
+    help: 'Za svaki dan unesite jedan ili više perioda rada. Dan bez perioda je neradan. Postojeći termini se ne menjaju.',
+  },
+  overrides: {
+    help: 'Poseban datum ima prednost nad radnim vremenom: firma tog dana ne radi ili radi u drugačije vreme.',
+    date: 'Datum',
+    closedAllDay: 'Ne radi ceo dan',
+    hours: 'Radi:',
+    note: 'Napomena',
+    add: 'Sačuvaj datum',
+    upcoming: 'Predstojeći posebni datumi',
+    none: 'Nema posebnih datuma.',
+  },
+  customerFormEdit: {
+    help: 'Izaberite koje podatke klijent unosi pri zakazivanju. Ime i prezime je uvek obavezno.',
+    questions: 'Dodatna pitanja',
+    questionLabel: 'Pitanje',
+    required: 'Obavezno',
+    addQuestion: '+ Dodaj pitanje',
+    noQuestions: 'Nema dodatnih pitanja.',
+  },
+  requirement: {
+    REQUIRED: 'Obavezno',
+    OPTIONAL: 'Nije obavezno',
+    HIDDEN: 'Ne traži se',
+  } satisfies Record<FieldRequirement, string>,
+
+  // Admin: appointments
+  appointments: {
+    title: 'Termini',
+    company: 'Firma',
+    status: 'Status',
+    from: 'Od datuma',
+    to: 'Do datuma',
+    empty: 'Nema termina za izabrane filtere.',
+    showing: 'Prikazano {count} od {total}.',
+    single: 'Prikazan je termin #{id}.',
+    showAll: 'Prikaži sve',
+    colId: '#',
+    colCompany: 'Firma',
+    colTime: 'Vreme',
+    colCustomer: 'Klijent',
+    colStatus: 'Status',
+    approve: 'Odobri',
+    deny: 'Odbij',
+    cancel: 'Otkaži',
+    complete: 'Održan',
+    noShow: 'Nije došao',
+    reschedule: 'Pomeri',
+    note: 'Napomena',
+    editNote: 'Napomena…',
+    cancelConfirm: 'Otkazati termin #{id}? Klijent će dobiti obaveštenje.',
+    denyConfirm: 'Odbiti zahtev #{id}? Klijent će dobiti obaveštenje.',
+    notDelivered: 'Nije dostavljeno firmi – predajte ručno',
+    delivered: 'Dostavljeno firmi {time}',
+    enteredByAdmin: 'uneo administrator',
+    rescheduleTitle: 'Pomeranje termina #{id}',
+    rescheduleConfirm: 'Pomeri na {date} {time}',
+  },
+  status: {
+    PENDING: 'Na čekanju',
+    APPROVED: 'Odobren',
+    DENIED: 'Odbijen',
+    CANCELLED: 'Otkazan',
+    COMPLETED: 'Održan',
+    NO_SHOW: 'Nije došao',
+  } satisfies Record<AppointmentStatus, string>,
+
+  newAppointment: {
+    title: 'Novi termin',
+    help: 'Termin koji unese administrator (npr. zakazan telefonom) odmah je odobren i šalje se firmi. Obavezno je samo ime klijenta.',
+    company: 'Firma',
+    chooseCompany: 'Izaberite firmu',
+    chooseSlot: 'Izaberite termin u rasporedu iznad.',
+    note: 'Interna napomena',
+    create: 'Unesi termin',
+    created: 'Termin #{id} je unet.',
+  },
+
+  calendar: {
+    title: 'Kalendar',
+    previousWeek: '← Prethodna nedelja',
+    nextWeek: 'Sledeća nedelja →',
+    thisWeek: 'Ova nedelja',
+    hideInactive: 'Sakrij odbijene i otkazane',
+    noAppointments: '—',
+    tooMany: 'Prikazano je prvih {count} termina ove nedelje.',
+  },
+
+  days: {
+    MONDAY: 'Ponedeljak',
+    TUESDAY: 'Utorak',
+    WEDNESDAY: 'Sreda',
+    THURSDAY: 'Četvrtak',
+    FRIDAY: 'Petak',
+    SATURDAY: 'Subota',
+    SUNDAY: 'Nedelja',
+  } satisfies Record<DayOfWeek, string>,
+
+  errors: {
+    generic: 'Došlo je do greške. Pokušajte ponovo.',
+    network: 'Server nije dostupan. Proverite vezu i pokušajte ponovo.',
+    invalidValue: 'Neispravna vrednost',
+    // Messages for the backend's error codes.
+    codes: {
+      VALIDATION_FAILED: 'Proverite unete podatke.',
+      SLOT_UNAVAILABLE: 'Ovaj termin više nije slobodan.',
+      SLOT_IN_PAST: 'Izabrano vreme je prošlo.',
+      OUTSIDE_BOOKING_WINDOW: 'Izabrani datum je van perioda zakazivanja.',
+      NOT_A_WORKING_SLOT: 'Izabrano vreme nije termin u radnom vremenu.',
+      CAPACITY_EXCEEDED: 'Odobravanjem bi bio prekoračen broj istovremenih termina.',
+      APPOINTMENT_IN_PAST: 'Vreme termina je već prošlo.',
+      APPOINTMENT_NOT_STARTED: 'Termin još nije počeo.',
+      APPOINTMENT_NOT_ACTIVE: 'Mogu se menjati samo termini na čekanju ili odobreni termini.',
+      INVALID_STATUS_TRANSITION: 'Ova promena statusa nije dozvoljena.',
+      COMPANY_INACTIVE: 'Firma je uklonjena.',
+      NOT_FOUND: 'Nije pronađeno.',
+      OVERLAPPING_PERIODS: 'Periodi rada se preklapaju.',
+      INVALID_PERIOD: 'Kraj perioda mora biti posle početka.',
+      DUPLICATE_DAY: 'Dan je naveden više puta.',
+      RANGE_TOO_LARGE: 'Izabrani period je predugačak.',
+      RATE_LIMITED: 'Previše pokušaja. Sačekajte malo pa pokušajte ponovo.',
+      UNAUTHENTICATED: 'Prijava je istekla. Prijavite se ponovo.',
+      INVALID_LOGIN_TOKEN: 'Link za prijavu je neispravan, već iskorišćen ili je istekao.',
+      INVALID_RANGE: 'Neispravan raspon datuma.',
+      MALFORMED_REQUEST: 'Neispravan zahtev.',
+    } as Record<string, string>,
+    // Translations of the backend's field validation messages.
+    fields: {
+      'is required': 'Obavezno polje',
+      'must not be blank': 'Obavezno polje',
+      'must be a valid phone number': 'Unesite ispravan broj telefona',
+      'must be a well-formed email address': 'Unesite ispravnu email adresu',
+      'is not a valid time zone': 'Nepoznata vremenska zona',
+      'must be unique': 'Mora biti jedinstveno',
+    } as Record<string, string>,
+  },
+};
+
+export function slotLabel(slot: SlotView): string {
+  if (slot.status === 'UNAVAILABLE') return t.slot[slot.reason ?? 'FULLY_BOOKED'];
+  return t.slot[slot.status];
+}
+
+/** Replaces {name} placeholders. */
+export function fmt(text: string, values: Record<string, string | number>): string {
+  return text.replace(/\{(\w+)\}/g, (match, key: string) => (key in values ? String(values[key]) : match));
+}

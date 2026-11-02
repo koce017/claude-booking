@@ -5,9 +5,13 @@ import type {
   Availability,
   BookingResult,
   Company,
+  CompanyUpdate,
   CustomerInput,
   Page,
+  Period,
+  ScheduleOverride,
   Session,
+  WeeklySchedule,
 } from './types';
 
 /** Error carrying the backend's problem-detail fields. */
@@ -36,8 +40,12 @@ export function getSession(): Session | null {
 }
 
 export function setSession(session: Session | null) {
-  if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  else localStorage.removeItem(SESSION_KEY);
+  try {
+    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    else localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* storage unavailable */
+  }
 }
 
 async function request<T>(path: string, init: RequestInit = {}, admin = false): Promise<T> {
@@ -64,6 +72,23 @@ async function request<T>(path: string, init: RequestInit = {}, admin = false): 
 
 const json = (body: unknown) => JSON.stringify(body);
 
+/** Sends only the customer fields that have a value. */
+function customerBody(customer: CustomerInput) {
+  const answers = Object.fromEntries(
+    Object.entries(customer.answers)
+      .map(([k, v]) => [k, v.trim()])
+      .filter(([, v]) => v),
+  );
+  const value = (s: string) => s.trim() || undefined;
+  return {
+    name: value(customer.name),
+    phone: value(customer.phone),
+    email: value(customer.email),
+    address: value(customer.address),
+    answers,
+  };
+}
+
 export const publicApi = {
   companies: () => request<Company[]>('/api/companies'),
   company: (id: number) => request<Company>(`/api/companies/${id}`),
@@ -72,9 +97,23 @@ export const publicApi = {
   book: (id: number, start: string, customer: CustomerInput) =>
     request<BookingResult>(`/api/companies/${id}/appointments`, {
       method: 'POST',
-      body: json({ start, customer }),
+      body: json({ start, customer: customerBody(customer) }),
     }),
 };
+
+export interface AppointmentFilter {
+  companyId?: number;
+  status?: AppointmentStatus;
+  from?: string;
+  to?: string;
+}
+
+const adminAppointment = (id: number, action: string, body?: unknown) =>
+  request<AdminAppointment>(
+    `/api/admin/appointments/${id}/${action}`,
+    { method: 'POST', body: body === undefined ? undefined : json(body) },
+    true,
+  );
 
 export const adminApi = {
   requestLink: (email: string) =>
@@ -82,17 +121,65 @@ export const adminApi = {
   verify: (token: string) =>
     request<Session>('/api/admin/auth/verify', { method: 'POST', body: json({ token }) }),
   logout: () => request<void>('/api/admin/auth/logout', { method: 'POST' }, true),
-  companies: () => request<AdminCompany[]>('/api/admin/companies', {}, true),
+
+  companies: (includeInactive = false) =>
+    request<AdminCompany[]>(`/api/admin/companies?includeInactive=${includeInactive}`, {}, true),
+  company: (id: number) => request<AdminCompany>(`/api/admin/companies/${id}`, {}, true),
   createCompany: (name: string) =>
     request<AdminCompany>('/api/admin/companies', { method: 'POST', body: json({ name }) }, true),
+  updateCompany: (id: number, update: CompanyUpdate) =>
+    request<AdminCompany>(`/api/admin/companies/${id}`, { method: 'PUT', body: json(update) }, true),
   removeCompany: (id: number) => request<void>(`/api/admin/companies/${id}`, { method: 'DELETE' }, true),
-  appointments: (filter: { companyId?: number; status?: AppointmentStatus }) => {
-    const params = new URLSearchParams({ size: '200' });
+
+  weeklySchedule: (id: number) => request<WeeklySchedule>(`/api/admin/companies/${id}/schedule/weekly`, {}, true),
+  saveWeeklySchedule: (id: number, days: WeeklySchedule['days']) =>
+    request<WeeklySchedule>(
+      `/api/admin/companies/${id}/schedule/weekly`,
+      { method: 'PUT', body: json({ days }) },
+      true,
+    ),
+  resetWeeklySchedule: (id: number) =>
+    request<WeeklySchedule>(`/api/admin/companies/${id}/schedule/weekly`, { method: 'DELETE' }, true),
+
+  overrides: (id: number, from: string, to: string) =>
+    request<ScheduleOverride[]>(`/api/admin/companies/${id}/schedule/overrides?from=${from}&to=${to}`, {}, true),
+  saveOverride: (id: number, date: string, periods: Period[], note: string) =>
+    request<ScheduleOverride>(
+      `/api/admin/companies/${id}/schedule/overrides/${date}`,
+      { method: 'PUT', body: json({ periods, note: note.trim() || null }) },
+      true,
+    ),
+  removeOverride: (id: number, date: string) =>
+    request<void>(`/api/admin/companies/${id}/schedule/overrides/${date}`, { method: 'DELETE' }, true),
+
+  appointments: (filter: AppointmentFilter, size = 200) => {
+    const params = new URLSearchParams({ size: String(size) });
     if (filter.companyId) params.set('companyId', String(filter.companyId));
     if (filter.status) params.set('status', filter.status);
+    if (filter.from) params.set('from', filter.from);
+    if (filter.to) params.set('to', filter.to);
     return request<Page<AdminAppointment>>(`/api/admin/appointments?${params}`, {}, true);
   },
-  approve: (id: number) =>
-    request<AdminAppointment>(`/api/admin/appointments/${id}/approve`, { method: 'POST' }, true),
-  deny: (id: number) => request<AdminAppointment>(`/api/admin/appointments/${id}/deny`, { method: 'POST' }, true),
+  appointment: (id: number) => request<AdminAppointment>(`/api/admin/appointments/${id}`, {}, true),
+  createAppointment: (companyId: number, start: string, customer: CustomerInput, adminNote: string) =>
+    request<AdminAppointment>(
+      '/api/admin/appointments',
+      {
+        method: 'POST',
+        body: json({ companyId, start, customer: customerBody(customer), adminNote: adminNote.trim() || null }),
+      },
+      true,
+    ),
+  approve: (id: number) => adminAppointment(id, 'approve'),
+  deny: (id: number) => adminAppointment(id, 'deny'),
+  cancel: (id: number) => adminAppointment(id, 'cancel'),
+  complete: (id: number) => adminAppointment(id, 'complete'),
+  noShow: (id: number) => adminAppointment(id, 'no-show'),
+  reschedule: (id: number, start: string) => adminAppointment(id, 'reschedule', { start }),
+  updateNote: (id: number, adminNote: string) =>
+    request<AdminAppointment>(
+      `/api/admin/appointments/${id}/note`,
+      { method: 'PUT', body: json({ adminNote: adminNote.trim() || null }) },
+      true,
+    ),
 };

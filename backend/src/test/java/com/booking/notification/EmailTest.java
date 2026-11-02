@@ -76,7 +76,8 @@ class EmailTest extends IntegrationTest {
         long id = bookViaApi(company.getId(), at(MONDAY, 10, 0), "Ana");
         mails.clear();
 
-        action(id, "approve").andExpect(status().isOk());
+        action(id, "approve").andExpect(status().isOk())
+                .andExpect(jsonPath("$.fulfilledAt").value(DEFAULT_NOW.toString()));
 
         OutgoingMail toCompany = only(COMPANY_MAIL);
         assertThat(toCompany.subject()).isEqualTo("Novi potvrđeni termin – ponedeljak, 12.10.2026. 10:00");

@@ -1,18 +1,24 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
-import CompanyListPage from './pages/public/CompanyListPage';
-import BookingPage from './pages/public/BookingPage';
-import AdminLoginPage from './pages/admin/AdminLoginPage';
-import AdminVerifyPage from './pages/admin/AdminVerifyPage';
-import AdminCompaniesPage from './pages/admin/AdminCompaniesPage';
+import { t } from './i18n/sr';
 import AdminAppointmentsPage from './pages/admin/AdminAppointmentsPage';
+import AdminCalendarPage from './pages/admin/AdminCalendarPage';
+import AdminCompaniesPage from './pages/admin/AdminCompaniesPage';
+import AdminCompanyEditPage from './pages/admin/AdminCompanyEditPage';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminNewAppointmentPage from './pages/admin/AdminNewAppointmentPage';
+import AdminVerifyPage from './pages/admin/AdminVerifyPage';
 import RequireAdmin from './pages/admin/RequireAdmin';
+import BookingPage from './pages/public/BookingPage';
+import CompanyListPage from './pages/public/CompanyListPage';
 
 export default function App() {
   return (
     <>
       <header className="topbar">
-        <Link to="/" className="brand">Appointment Booking</Link>
-        <Link to="/admin">Admin</Link>
+        <Link to="/" className="brand">
+          {t.appName}
+        </Link>
+        <Link to="/admin">{t.nav.admin}</Link>
       </header>
       <main className="container">
         <Routes>
@@ -20,10 +26,20 @@ export default function App() {
           <Route path="/companies/:companyId" element={<BookingPage />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/verify" element={<AdminVerifyPage />} />
-          <Route path="/admin" element={<Navigate to="/admin/companies" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/appointments" replace />} />
           <Route path="/admin/companies" element={<RequireAdmin><AdminCompaniesPage /></RequireAdmin>} />
+          <Route path="/admin/companies/:companyId" element={<RequireAdmin><AdminCompanyEditPage /></RequireAdmin>} />
           <Route path="/admin/appointments" element={<RequireAdmin><AdminAppointmentsPage /></RequireAdmin>} />
-          <Route path="*" element={<p>Page not found. <Link to="/">Go home</Link></p>} />
+          <Route path="/admin/appointments/new" element={<RequireAdmin><AdminNewAppointmentPage /></RequireAdmin>} />
+          <Route path="/admin/calendar" element={<RequireAdmin><AdminCalendarPage /></RequireAdmin>} />
+          <Route
+            path="*"
+            element={
+              <p>
+                {t.common.notFound} <Link to="/">{t.common.goHome}</Link>
+              </p>
+            }
+          />
         </Routes>
       </main>
     </>

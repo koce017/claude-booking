@@ -1,13 +1,15 @@
 import { FormEvent, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { adminApi, getSession } from '../../api/client';
+import { errorMessage } from '../../errors';
+import { t } from '../../i18n/sr';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (getSession()) return <Navigate to="/admin/companies" replace />;
+  if (getSession()) return <Navigate to="/admin/appointments" replace />;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -16,26 +18,26 @@ export default function AdminLoginPage() {
       await adminApi.requestLink(email.trim());
       setSent(true);
     } catch (err) {
-      setError((err as Error).message);
+      setError(errorMessage(err));
     }
   }
 
   return (
     <section>
-      <h1>Admin login</h1>
+      <h1>{t.login.title}</h1>
       {sent ? (
         <p className="success">
-          If this email belongs to an administrator, a login link has been sent. Open it to sign in.
+          {t.login.sent}
           <br />
-          <span className="muted">(Local development: the link is printed in the backend log.)</span>
+          <span className="muted">{t.login.devHint}</span>
         </p>
       ) : (
         <form onSubmit={submit} className="inline-form">
           <label>
-            Email
+            {t.login.email}
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </label>
-          <button type="submit">Send login link</button>
+          <button type="submit">{t.login.send}</button>
         </form>
       )}
       {error && <p className="error">{error}</p>}

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { adminApi, setSession } from '../../api/client';
+import { errorMessage } from '../../errors';
+import { t } from '../../i18n/sr';
 
 export default function AdminVerifyPage() {
   const [params] = useSearchParams();
@@ -14,24 +16,24 @@ export default function AdminVerifyPage() {
     started.current = true;
     const token = params.get('token');
     if (!token) {
-      setError('The login link is missing its token.');
+      setError(t.login.missingToken);
       return;
     }
     adminApi
       .verify(token)
       .then((session) => {
         setSession(session);
-        navigate('/admin/companies', { replace: true });
+        navigate('/admin/appointments', { replace: true });
       })
-      .catch((e: Error) => setError(e.message));
+      .catch((e) => setError(errorMessage(e)));
   }, [params, navigate]);
 
   return (
     <section>
-      <h1>Signing in…</h1>
+      <h1>{t.login.signingIn}</h1>
       {error && (
         <p className="error">
-          {error} <Link to="/admin/login">Request a new link</Link>
+          {error} <Link to="/admin/login">{t.login.newLink}</Link>
         </p>
       )}
     </section>

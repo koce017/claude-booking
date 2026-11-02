@@ -18,3 +18,7 @@ frontend/dist/
 *.iml
 .vscode/
 .DS_Store
+
+# End-to-end check
+e2e/node_modules/
+e2e/screenshots/

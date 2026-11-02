@@ -1,87 +1,45 @@
-import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError, publicApi } from '../../api/client';
-import type { Availability, BookingResult, Company, CustomerInput, SlotView } from '../../api/types';
-import { slotLabel } from './statusLabels';
-
-function todayIso(): string {
-  const d = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-function shiftDate(iso: string, days: number): string {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
-const emptyCustomer: CustomerInput = { name: '', phone: '', email: '' };
+import type { BookingResult, Company, CustomerInput, SlotView } from '../../api/types';
+import CustomerFields, { emptyCustomer } from '../../components/CustomerFields';
+import SlotPicker from '../../components/SlotPicker';
+import { errorMessage, fieldErrors } from '../../errors';
+import { formatDate, todayIso } from '../../format';
+import { fmt, t } from '../../i18n/sr';
 
 export default function BookingPage() {
   const companyId = Number(useParams().companyId);
   const [company, setCompany] = useState<Company | null>(null);
   const [date, setDate] = useState(todayIso());
-  const [availability, setAvailability] = useState<Availability | null>(null);
   const [selected, setSelected] = useState<SlotView | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [customer, setCustomer] = useState<CustomerInput>(emptyCustomer);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [booked, setBooked] = useState<{ result: BookingResult; slot: SlotView; date: string } | null>(null);
 
   useEffect(() => {
-    publicApi.company(companyId).then(setCompany).catch((e: Error) => setError(e.message));
+    publicApi.company(companyId).then(setCompany).catch((e) => setError(errorMessage(e)));
   }, [companyId]);
-
-  // Only the most recent availability request may update the page; an older
-  // response arriving late (e.g. after a quick date change) is ignored.
-  const latestRequest = useRef(0);
-  const loadAvailability = useCallback(() => {
-    const requestId = ++latestRequest.current;
-    setAvailability(null);
-    return publicApi
-      .availability(companyId, date)
-      .then((result) => {
-        if (requestId === latestRequest.current) setAvailability(result);
-      })
-      .catch((e: Error) => {
-        if (requestId === latestRequest.current) setError(e.message);
-      });
-  }, [companyId, date]);
-
-  useEffect(() => {
-    setSelected(null);
-    setError(null);
-    loadAvailability();
-  }, [loadAvailability]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!selected) return;
     setSubmitting(true);
     setError(null);
-    setFieldErrors({});
+    setErrors({});
     try {
-      const result = await publicApi.book(companyId, selected.start, {
-        name: customer.name.trim(),
-        phone: customer.phone.trim(),
-        email: customer.email.trim(),
-      });
+      const result = await publicApi.book(companyId, selected.start, customer);
       setBooked({ result, slot: selected, date });
       setCustomer(emptyCustomer);
-      setSelected(null);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.status === 409 ? 'Sorry, this slot was just taken. Please choose another time.' : err.message);
-        setFieldErrors(err.fieldErrors);
-        if (err.status === 409 || err.code === 'SLOT_IN_PAST') {
-          setSelected(null);
-          loadAvailability();
-        }
-      } else {
-        setError('Could not submit the request. Please try again.');
-      }
+      const slotGone =
+        err instanceof ApiError && (err.status === 409 || err.code === 'SLOT_IN_PAST' || err.code === 'NOT_A_WORKING_SLOT');
+      setError(err instanceof ApiError && err.status === 409 ? t.booking.slotTaken : errorMessage(err));
+      setErrors(fieldErrors(err));
+      if (slotGone) setReloadKey((k) => k + 1);
     } finally {
       setSubmitting(false);
     }
@@ -90,107 +48,71 @@ export default function BookingPage() {
   if (booked) {
     return (
       <section>
-        <h1>Request submitted</h1>
+        <h1>{t.booking.doneTitle}</h1>
         <p className="success">
-          Your appointment request with <strong>{company?.name}</strong> for {booked.date}{' '}
-          {booked.slot.localStart}–{booked.slot.localEnd} has been received (reference #{booked.result.id}).
+          {fmt(t.booking.doneText, {
+            company: company?.name ?? '',
+            date: formatDate(booked.date),
+            start: booked.slot.localStart,
+            end: booked.slot.localEnd,
+            id: booked.result.id,
+          })}
         </p>
-        <p>Its status is <strong>pending</strong>: an administrator will review it.</p>
+        <p>{t.booking.doneStatus}</p>
         <button
           onClick={() => {
             setBooked(null);
-            loadAvailability();
+            setReloadKey((k) => k + 1);
           }}
         >
-          Book another time
+          {t.booking.bookAnother}
         </button>{' '}
-        <Link to="/">Back to companies</Link>
+        <Link to="/">{t.booking.backToCompanies}</Link>
       </section>
     );
   }
 
-  const bookingWindow = availability?.bookingWindow;
-  const day = availability?.days[0];
-
   return (
     <section>
-      <p><Link to="/">← All companies</Link></p>
-      <h1>{company?.name ?? 'Loading…'}</h1>
+      <p>
+        <Link to="/">{t.booking.allCompanies}</Link>
+      </p>
+      <h1>{company?.name ?? t.common.loading}</h1>
+      {company?.description && <p>{company.description}</p>}
+      {company && (company.address || company.phone) && (
+        <p className="muted">{[company.address, company.phone].filter(Boolean).join(' · ')}</p>
+      )}
 
-      <div className="date-bar">
-        <button onClick={() => setDate(shiftDate(date, -1))} disabled={!!bookingWindow && date <= bookingWindow.firstDate}>
-          ← Previous day
-        </button>
-        <input
-          type="date"
-          value={date}
-          min={bookingWindow?.firstDate}
-          max={bookingWindow?.lastDate}
-          onChange={(e) => e.target.value && setDate(e.target.value)}
+      {company && (
+        <SlotPicker
+          companyId={companyId}
+          date={date}
+          onDateChange={setDate}
+          selected={selected}
+          onSelect={(slot) => {
+            setSelected(slot);
+            setError(null);
+          }}
+          reloadKey={reloadKey}
         />
-        <button onClick={() => setDate(shiftDate(date, 1))} disabled={!!bookingWindow && date >= bookingWindow.lastDate}>
-          Next day →
-        </button>
-      </div>
-      {availability && (
-        <p className="muted">
-          Times are shown in the company's time zone ({availability.timezone}). Appointments last{' '}
-          {availability.appointmentDurationMinutes} minutes. Bookable until {bookingWindow?.lastDate}.
-        </p>
       )}
-
       {error && <p className="error">{error}</p>}
-      {!availability && !error && <p>Loading availability…</p>}
 
-      {day && (
-        <>
-          {!day.working && <p>The company does not work on this day.</p>}
-          <ul className="slots">
-            {day.slots.map((slot) => (
-              <li key={slot.start}>
-                <button
-                  className={`slot slot-${slot.status.toLowerCase()} ${selected?.start === slot.start ? 'selected' : ''}`}
-                  disabled={!slot.bookable}
-                  onClick={() => {
-                    setSelected(slot);
-                    setError(null);
-                  }}
-                >
-                  <span className="slot-time">{slot.localStart}–{slot.localEnd}</span>
-                  <span className="slot-status">{slotLabel(slot)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {selected && (
-        <form className="booking-form" onSubmit={submit}>
-          <h2>Request {date} {selected.localStart}–{selected.localEnd}</h2>
-          {selected.pendingRequests && (
-            <p className="muted">Other requests are already pending for this time; you can still request it.</p>
-          )}
-          <label>
-            Name
-            <input required maxLength={200} value={customer.name}
-              onChange={(e) => setCustomer({ ...customer, name: e.target.value })} />
-            {fieldErrors['customer.name'] && <span className="error">{fieldErrors['customer.name']}</span>}
-          </label>
-          <label>
-            Phone
-            <input required type="tel" maxLength={50} pattern="[0-9+()\-./ ]+" value={customer.phone}
-              onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
-            {fieldErrors['customer.phone'] && <span className="error">{fieldErrors['customer.phone']}</span>}
-          </label>
-          <label>
-            Email
-            <input required type="email" maxLength={320} value={customer.email}
-              onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
-            {fieldErrors['customer.email'] && <span className="error">{fieldErrors['customer.email']}</span>}
-          </label>
-          <button type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit request'}</button>{' '}
-          <button type="button" className="secondary" onClick={() => setSelected(null)}>Cancel</button>
+      {company && selected && (
+        <form className="panel-form" onSubmit={submit}>
+          <h2>
+            {fmt(t.booking.formTitle, { date: formatDate(date), start: selected.localStart, end: selected.localEnd })}
+          </h2>
+          {selected.pendingRequests && <p className="muted">{t.booking.otherPending}</p>}
+          <CustomerFields form={company.customerForm} value={customer} onChange={setCustomer} errors={errors} />
+          <div>
+            <button type="submit" disabled={submitting}>
+              {submitting ? t.booking.submitting : t.booking.submit}
+            </button>{' '}
+            <button type="button" className="secondary" onClick={() => setSelected(null)}>
+              {t.common.cancel}
+            </button>
+          </div>
         </form>
       )}
     </section>
