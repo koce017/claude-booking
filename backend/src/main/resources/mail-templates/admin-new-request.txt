@@ -1,0 +1,16 @@
+Subject: Novi zahtev za termin – {company}, {date} {time}
+
+Stigao je novi zahtev za termin koji čeka odobrenje.
+
+Firma: {company}
+Datum: {date}
+Vreme: {time}–{endTime}
+
+Klijent: {customerName}
+Telefon: {customerPhone}
+Email: {customerEmail}
+Adresa: {customerAddress}
+Odgovori:
+{customerAnswers}
+
+Pregled zahteva: {adminLink}

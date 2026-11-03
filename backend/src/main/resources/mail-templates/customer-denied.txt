@@ -1,0 +1,14 @@
+Subject: Zahtev za termin nije prihvaćen – {company}
+
+Poštovani/a {customerName},
+
+nažalost, vaš zahtev za termin nije prihvaćen:
+
+Firma: {company}
+Datum: {date}
+Vreme: {time}–{endTime}
+Broj zahteva: {appointmentId}
+
+Možete izabrati drugi termin na našem sajtu.
+
+Srdačan pozdrav

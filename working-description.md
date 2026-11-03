@@ -1,5 +1,7 @@
-Appointment Booking Platform — Backend & MVP Frontend Specification
-1. Project Overview
+# Appointment Booking Platform — Backend & MVP Frontend Specification
+
+## 1. Project Overview
+
 Build a web application that allows users to request appointments with different companies.
 
 The application has two primary areas:
@@ -21,7 +23,8 @@ Administrators can approve or deny appointment requests.
 The architecture must support future editing of company settings, working hours, appointment duration, capacity, required customer information, etc.
 The initial implementation is intentionally limited. The backend should be designed as a proper foundation for the complete system, but the initial frontend should only expose the functionality necessary to test the basic appointment-booking flow.
 
-2. Technology Stack
+## 2. Technology Stack
+
 Backend
 Use:
 
@@ -61,7 +64,8 @@ The frontend is only an MVP/testing interface at this stage.
 
 Do not spend significant effort on visual design.
 
-3. Repository Structure
+## 3. Repository Structure
+
 Use a single repository:
 
 /
@@ -80,7 +84,8 @@ The backend and frontend should remain independently runnable.
 
 Document how to start both applications locally.
 
-4. Core Domain Model
+## 4. Core Domain Model
+
 The main entities should be designed around the following concepts:
 
 Company
@@ -92,7 +97,8 @@ Customer/booking information
 Future fulfillment mechanism
 Do not over-engineer the first version, but structure the code so additional functionality can be added without rewriting the core appointment logic.
 
-5. Company
+## 5. Company
+
 A company represents an organization for which users can request appointments.
 
 At minimum, the database should contain a Company entity with an auto-generated database ID.
@@ -124,7 +130,8 @@ The administrator should therefore initially be able to create a company by ente
 
 Do not require the administrator frontend to configure the advanced settings yet.
 
-6. Default Company Settings
+## 6. Default Company Settings
+
 Although the advanced settings are not exposed in the first frontend, the backend should have sensible defaults where the business logic requires them.
 
 Use these defaults:
@@ -138,7 +145,8 @@ The application/service layer should resolve an unset value to the appropriate d
 
 The design must allow these values to be configured per company in the future.
 
-7. Appointment Duration
+## 7. Appointment Duration
+
 Appointment duration is configurable per company.
 
 Default:
@@ -162,7 +170,8 @@ Do not implement independent slot intervals yet.
 
 The architecture should nevertheless not make it impossible to introduce them later.
 
-8. Maximum Concurrent Appointments
+## 8. Maximum Concurrent Appointments
+
 Each company can eventually define how many appointments can exist at the same time.
 
 Example:
@@ -189,7 +198,8 @@ Both PENDING and APPROVED appointments consume capacity.
 
 DENIED appointments do not consume capacity.
 
-9. Appointment Status
+## 9. Appointment Status
+
 Keep the status model simple.
 
 Use:
@@ -217,7 +227,8 @@ Created when an administrator denies a pending appointment.
 
 It no longer consumes capacity.
 
-10. Booking Concurrency / Race Conditions
+## 10. Booking Concurrency / Race Conditions
+
 This is a critical requirement.
 
 When two users attempt to book the final available capacity of the same time slot simultaneously, the backend must ensure that the company's maximum concurrent appointment limit is never exceeded.
@@ -245,7 +256,8 @@ Use an appropriate PostgreSQL/JPA transaction and locking strategy.
 
 The implementation should be carefully designed and tested for concurrent requests.
 
-11. Appointment Date/Time Representation
+## 11. Appointment Date/Time Representation
+
 Appointments must use a start and end datetime rather than storing only an hour.
 
 Conceptually:
@@ -264,7 +276,8 @@ date = 2026-11-12
 hour = 14
 The system must be capable of handling different durations later.
 
-12. Time Zones
+## 12. Time Zones
+
 Companies can eventually operate in different time zones.
 
 Therefore, do not build the application around a single hardcoded global timezone.
@@ -281,7 +294,8 @@ For the initial version, if the company's timezone is NULL, use a clearly docume
 
 Do not hardcode the timezone in multiple parts of the application.
 
-13. Working Days and Hours
+## 13. Working Days and Hours
+
 The backend must be designed to support configurable working schedules.
 
 Conceptually:
@@ -315,7 +329,8 @@ End time
 Potentially multiple working periods per day in the future
 Do not assume every company has the same schedule.
 
-14. Special-Date Overrides
+## 14. Special-Date Overrides
+
 The system must support exceptions to the normal weekly schedule.
 
 For example:
@@ -340,7 +355,8 @@ A specific-date override takes precedence over the normal weekly schedule.
 
 This should be implemented as a reusable scheduling component/service rather than duplicated throughout appointment logic.
 
-15. Booking Window
+## 15. Booking Window
+
 Users can book up to one year into the future.
 
 The booking window is:
@@ -362,7 +378,8 @@ The booking window must not allow bookings beyond the end of that final month.
 
 Past dates cannot be booked.
 
-16. Availability
+## 16. Availability
+
 The backend must expose availability information for a company and date/date range.
 
 For each generated appointment slot, the backend should determine one of these public states:
@@ -408,7 +425,8 @@ For example, never expose:
 John Smith has requested this slot.
 The public API should only communicate aggregate availability/state.
 
-17. Non-Working Hours
+## 17. Non-Working Hours
+
 The availability API must distinguish working time from non-working time.
 
 Non-working periods should not be treated as normal unavailable appointments.
@@ -422,14 +440,16 @@ The backend must nevertheless understand the distinction.
 
 A user must never be able to create an appointment outside a company's working schedule.
 
-18. Past Slots
+## 18. Past Slots
+
 Any appointment slot whose start time is in the past must not be bookable.
 
 The backend must enforce this independently of the frontend.
 
 Do not rely on the frontend hiding past times.
 
-19. Public Booking Flow
+## 19. Public Booking Flow
+
 The intended public flow is:
 
 1. User opens website.
@@ -449,7 +469,8 @@ The frontend must not assume that a slot is still available merely because it wa
 
 The backend must always revalidate availability during booking.
 
-20. Customer Information
+## 20. Customer Information
+
 Users do not create accounts.
 
 When submitting an appointment request, they provide their personal/contact information.
@@ -482,7 +503,8 @@ Do not tightly couple the entire booking architecture to exactly three fields.
 
 The first implementation may use dedicated fields for name/phone/email if that substantially simplifies the MVP, but the domain/service design should leave a clear path toward configurable fields.
 
-21. No User Accounts
+## 21. No User Accounts
+
 There is no public user registration or login.
 
 A customer can make multiple appointment requests without having an account.
@@ -496,7 +518,8 @@ customer login
 customer account management
 into the MVP.
 
-22. Appointment Approval
+## 22. Appointment Approval
+
 Every user booking initially becomes:
 
 PENDING
@@ -515,7 +538,8 @@ If approval would violate the capacity limit, the backend must refuse the approv
 
 This situation should be handled gracefully rather than allowing capacity to be exceeded.
 
-23. Approval/Fulfillment Architecture
+## 23. Approval/Fulfillment Architecture
+
 This is a major architectural requirement.
 
 What happens after an appointment is approved is intentionally undecided.
@@ -568,7 +592,9 @@ availability logic
 company management
 booking frontend
 appointment state machine
-24. Admin Authentication
+
+## 24. Admin Authentication
+
 Administrators use magic-link authentication.
 
 There is no public admin registration.
@@ -597,7 +623,8 @@ For local development/testing, provide a practical way to create the initial adm
 
 Do not build an admin registration interface.
 
-25. Administrators
+## 25. Administrators
+
 All administrators have identical permissions.
 
 There are no roles such as:
@@ -610,7 +637,8 @@ for the first version.
 
 Any authenticated administrator can perform all administrator operations.
 
-26. Company Management
+## 26. Company Management
+
 The initial admin functionality must support:
 
 Create company
@@ -633,7 +661,8 @@ A removed company should no longer appear to public users.
 
 Historical appointments should remain internally consistent.
 
-27. Admin Appointment Management
+## 27. Admin Appointment Management
+
 The backend must support administrators viewing appointment requests.
 
 At minimum, administrators should be able to:
@@ -649,7 +678,8 @@ The initial frontend does not need to expose every advanced admin feature.
 
 The backend should nevertheless be structured so they can be added easily.
 
-28. Admin Manual Appointment Creation
+## 28. Admin Manual Appointment Creation
+
 The complete architecture should eventually support administrators creating appointments manually.
 
 However, this is not necessary for the initial frontend.
@@ -658,7 +688,8 @@ If implementing the backend API now, it is acceptable to include it if it can be
 
 Do not let this feature complicate the core booking system.
 
-29. Admin Calendar
+## 29. Admin Calendar
+
 The complete system should eventually provide administrators with a calendar showing:
 
 company
@@ -669,7 +700,8 @@ status
 customer
 The initial frontend does not need to implement the full admin calendar.
 
-30. REST API
+## 30. REST API
+
 Design a clean REST API.
 
 The exact endpoint naming can be chosen by the implementation, but the API should conceptually contain:
@@ -690,7 +722,8 @@ and derive/validate the end time using the company's appointment duration.
 
 Do not trust a client-provided end time if it could contradict company configuration.
 
-31. Admin API
+## 31. Admin API
+
 Conceptually:
 
 POST   /api/admin/auth/request-link
@@ -707,7 +740,8 @@ Exact endpoint naming may differ.
 
 Keep public and admin endpoints clearly separated.
 
-32. Validation
+## 32. Validation
+
 Validate all requests on the backend.
 
 Examples:
@@ -727,7 +761,8 @@ capacity must be available
 customer information must satisfy company requirements
 Do not trust frontend validation as a security/business-rule mechanism.
 
-33. Database
+## 33. Database
+
 Use PostgreSQL.
 
 Use JPA/Hibernate for persistence.
@@ -743,7 +778,8 @@ Use migrations for database structure.
 
 The initial migrations should create all required tables, indexes, constraints, and relationships.
 
-34. Database IDs
+## 34. Database IDs
+
 Database IDs should be automatically generated.
 
 Do not require the client to supply IDs for:
@@ -755,7 +791,8 @@ schedule records
 other persistent entities
 The exact ID type can be selected by the developer, but use a conventional generated identifier.
 
-35. Suggested Entity Structure
+## 35. Suggested Entity Structure
+
 A reasonable starting point is:
 
 Company
@@ -794,7 +831,8 @@ Working schedules and special dates should be represented by their own appropria
 
 The exact entity decomposition is up to the implementation as long as the required behavior is preserved.
 
-36. Indexing
+## 36. Indexing
+
 Add appropriate database indexes.
 
 At minimum, appointment queries will frequently filter by:
@@ -808,7 +846,8 @@ company + startDateTime
 company + startDateTime + status
 Do not blindly add indexes to every column.
 
-37. Availability Algorithm
+## 37. Availability Algorithm
+
 The availability service should roughly perform the following process:
 
 Input:
@@ -833,7 +872,8 @@ Do not implement one version in the frontend and another in the backend.
 
 The backend is authoritative.
 
-38. Slot Alignment
+## 38. Slot Alignment
+
 If the working period is:
 
 09:00–17:00
@@ -858,7 +898,8 @@ For example:
 16:30–17:30
 must not be generated when working hours end at 17:00.
 
-39. Booking Transaction
+## 39. Booking Transaction
+
 The appointment creation service should execute as a database transaction.
 
 Conceptually:
@@ -889,7 +930,8 @@ The implementation must account for concurrent requests.
 
 This is one of the most important correctness requirements in the project.
 
-40. Public Privacy
+## 40. Public Privacy
+
 The public availability endpoint must never reveal customer information.
 
 For example, the public response may contain:
@@ -908,7 +950,8 @@ but never:
 }
 Customer information is administrator-only.
 
-41. Initial Frontend
+## 41. Initial Frontend
+
 The first frontend is intentionally very simple.
 
 Do not build the complete production website.
@@ -939,7 +982,8 @@ Pending
 Non-working
 The exact visual styling is not important.
 
-42. Admin Frontend
+## 42. Admin Frontend
+
 The initial admin frontend only needs enough functionality to test company management.
 
 It should include:
@@ -969,7 +1013,8 @@ special dates
 required customer fields
 These should exist architecturally in the backend but can remain NULL/default for this testing version.
 
-43. Testing Defaults
+## 43. Testing Defaults
+
 Because the initial frontend does not expose advanced company settings, the application needs a practical way to test appointments.
 
 For a newly created company, use the following defaults unless explicitly configured:
@@ -1000,7 +1045,8 @@ January 7 → closed
 January 8 → closed
 Do not permanently hardcode those dates into the business logic. They should be represented through the special-date scheduling mechanism.
 
-44. Error Handling
+## 44. Error Handling
+
 The API should return appropriate HTTP status codes.
 
 Examples:
@@ -1027,7 +1073,8 @@ Return structured JSON error responses.
 
 Do not expose stack traces or internal database errors to clients.
 
-45. Frontend/Backend Separation
+## 45. Frontend/Backend Separation
+
 The frontend must communicate with the backend through the REST API.
 
 Do not duplicate booking business logic in React.
@@ -1049,7 +1096,9 @@ appointment creation
 approval
 authorization
 all business rules
-46. Configuration
+
+## 46. Configuration
+
 Application configuration should use environment variables/configuration files rather than hardcoded secrets.
 
 Examples:
@@ -1069,7 +1118,8 @@ For local development, provide a documented development mode or mail configurati
 
 Do not commit secrets.
 
-47. Email / Notifications
+## 47. Email / Notifications
+
 Notifications are intentionally not finalized.
 
 The architecture should not depend heavily on email.
@@ -1085,7 +1135,8 @@ However, notification behavior should be isolated behind a service/interface so 
 
 Do not make the booking transaction dependent on successfully sending an email unless there is a deliberate future requirement to do so.
 
-48. Fulfillment vs Notifications
+## 48. Fulfillment vs Notifications
+
 Keep these concepts separate.
 
 Notification means communicating with a user/admin.
@@ -1103,7 +1154,8 @@ These should not be one giant service.
 
 This separation is important because both mechanisms are subject to future change.
 
-49. API Documentation
+## 49. API Documentation
+
 Provide clear API documentation.
 
 Preferably use OpenAPI/Swagger.
@@ -1118,7 +1170,8 @@ error responses
 authentication requirements
 This will make future frontend development significantly easier.
 
-50. Automated Tests
+## 50. Automated Tests
+
 The backend must contain automated tests for the most important business logic.
 
 At minimum, test:
@@ -1162,7 +1215,8 @@ Include a test or appropriate integration-level validation that concurrent booki
 
 This is especially important.
 
-51. Code Quality
+## 51. Code Quality
+
 Use clear names and conventional Spring Boot practices.
 
 Prefer:
@@ -1182,7 +1236,8 @@ Business logic should be decomposed into logical services.
 
 Use DTOs for API requests/responses rather than exposing JPA entities directly from controllers.
 
-52. Do Not Over-Engineer
+## 52. Do Not Over-Engineer
+
 This is an MVP.
 
 Do not implement unnecessarily complex features such as:
@@ -1206,7 +1261,8 @@ A modular monolith is the appropriate architecture.
 
 The backend should be a single Spring Boot application.
 
-53. Future-Proofing Requirements
+## 53. Future-Proofing Requirements
+
 Even though many features are not implemented in the first frontend, the backend design must leave room for:
 
 Configurable company settings
@@ -1230,7 +1286,8 @@ Do not implement all of these now.
 
 The goal is to make the core architecture extensible without making the MVP unnecessarily complicated.
 
-54. Definition of Done
+## 54. Definition of Done
+
 The first version is considered complete when all of the following work:
 
 Backend
@@ -1276,7 +1333,8 @@ Admin can view companies.
 Admin can remove a company.
 The frontend does not need advanced company configuration yet.
 
-55. Important Architectural Principle
+## 55. Important Architectural Principle
+
 The most important design principle of this project is:
 
 The appointment-booking system must not depend on what happens after approval.
@@ -1318,7 +1376,8 @@ The core flow should be:
         Manual later       Email later       Company API
 The final part can be replaced without changing the rest of the system.
 
-56. Implementation Approach
+## 56. Implementation Approach
+
 Implement the project incrementally.
 
 Recommended order:
@@ -1347,7 +1406,8 @@ At every stage, keep the application runnable.
 
 Do not build the entire frontend before testing the backend booking logic.
 
-57. Expected End-to-End Test
+## 57. Expected End-to-End Test
+
 The following scenario should work from beginning to end:
 
 Setup
@@ -1422,7 +1482,8 @@ the 10:00 capacity becomes available again.
 
 A new user can then request 10:00.
 
-58. Final Implementation Constraint
+## 58. Final Implementation Constraint
+
 When making implementation decisions not explicitly specified in this document, prefer:
 
 Simplicity
@@ -1434,4 +1495,4 @@ Do not introduce unnecessary infrastructure.
 
 The application should be a clean modular monolith with a strong appointment-domain core.
 
-The first version is primarily a functional backend + minimal testing frontend, not a polished production website. :::
+The first version is primarily a functional backend + minimal testing frontend, not a polished production website.

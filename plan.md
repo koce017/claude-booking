@@ -1,3 +1,6 @@
+> **Note:** This was the first summary of the project. The full specification is in
+> [`working-description.md`](working-description.md), and the current state is in [`STATUS.md`](STATUS.md).
+
 # Task
 - The main goal is to make a website for booking appointments with various companies.
 - Users can select which company the want to book an appointment with. After selecting, a calendar like interface will appear, in which users can view an hour by hour breakdown of each day. Every hour can either be booked or free or a non working hour. Users can than select an hour and make an appointment for that hour. Upon making an appointment, a request gets sent to the site admins to approve the appointment.

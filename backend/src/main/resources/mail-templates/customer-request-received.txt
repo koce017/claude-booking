@@ -1,0 +1,14 @@
+Subject: Primili smo vaš zahtev za termin – {company}
+
+Poštovani/a {customerName},
+
+primili smo vaš zahtev za termin:
+
+Firma: {company}
+Datum: {date}
+Vreme: {time}–{endTime}
+Broj zahteva: {appointmentId}
+
+Zahtev još nije potvrđen. Javićemo vam čim ga administrator pregleda.
+
+Srdačan pozdrav

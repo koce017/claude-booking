@@ -1,0 +1,12 @@
+Subject: Otkazan termin – {date} {time}
+
+Poštovani,
+
+sledeći termin za {company} je otkazan:
+
+Datum: {date}
+Vreme: {time}–{endTime}
+Broj termina: {appointmentId}
+Klijent: {customerName}
+
+Srdačan pozdrav
